@@ -10,7 +10,10 @@
 #define MAX_BUFF_SIZE 64
 /*
  * TODO (выделение памяти неправильное)
+ *
  * */
+
+struct Token *tokens;
 
 char kwords[][8] = {"int", "str", "print"};
 
@@ -40,14 +43,14 @@ int is_delim(char c) {
     return 0;
 }
 
-void update_mem(unsigned n_tokens, unsigned *mem_size, struct Token *tokens) {
-    if (n_tokens == *mem_size) {
+void update_mem(unsigned n_tokens, unsigned *mem_size) {
+    if (n_tokens + 1 == *mem_size) {
         *mem_size = *mem_size * 2;
-        tokens = (struct Token *) realloc(tokens, *mem_size);
+        tokens = (struct Token *) realloc(tokens, sizeof(struct Token) * (*mem_size));
     }
 }
 
-void save(char *word, unsigned *length, unsigned *wp, struct Token *tokens, unsigned *mem_size) {
+void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size) {
     if (*length != 0) {
         word[*length] = '\0';
         if (is_kword(word)) {
@@ -60,12 +63,12 @@ void save(char *word, unsigned *length, unsigned *wp, struct Token *tokens, unsi
         strcpy(tokens[*wp].str, word);
         *length = 0;
         (*wp)++;
-        update_mem(*wp, mem_size, tokens);
+        update_mem(*wp, mem_size);
     }
 }
 
 struct Token *lexer(FILE *f, unsigned mem_size) {
-    struct Token *tokens = (struct Token *) malloc(sizeof(struct Token *) * mem_size);
+    tokens = (struct Token *) malloc(sizeof(struct Token) * mem_size);
     char sym;
     unsigned is_str = FALSE;
     unsigned line_num = 1;
@@ -84,7 +87,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
                 tokens[wp] = (struct Token) {STR};
                 strcpy(tokens[wp].str, word);
                 wp++;
-                update_mem(wp, &mem_size, tokens);
+                update_mem(wp, &mem_size);
             } else {
                 word[length] = sym;
                 length++;
@@ -94,7 +97,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
                 }
             }
         } else if (_is_delim == 1) {
-            save(word, &length, &wp, tokens, &mem_size);
+            save(word, &length, &wp, &mem_size);
             switch (sym) {
                 case '-':
                     tokens[wp] = (struct Token) {BINOP, "-"};
@@ -129,10 +132,10 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
                     break;
             }
             wp++;
-            update_mem(wp, &mem_size, tokens);
+            update_mem(wp, &mem_size);
 
         } else if (_is_delim == 2) {
-            save(word, &length, &wp, tokens, &mem_size);
+            save(word, &length, &wp, &mem_size);
             switch (sym) {
                 case '|':
                     if (next_sym == '|') {
@@ -177,7 +180,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
                     } else tokens[wp] = (struct Token) {BINOP, "="};
             }
             wp++;
-            update_mem(wp, &mem_size, tokens);
+            update_mem(wp, &mem_size);
         } else {
             word[length] = sym;
             length++;
@@ -185,7 +188,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
                 printf(err(TOO_LONG_VAR)"\nВ строке %d: %s...", line_num, word);
                 exit(1);
             }
-            if (next_sym == EOF) save(word, &length, &wp, tokens, &mem_size);
+            if (next_sym == EOF) save(word, &length, &wp, &mem_size);
         }
     }
     tokens[wp] = (struct Token) {TEND};
