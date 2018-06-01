@@ -1,0 +1,6 @@
+str hello = "Result is:
+"
+
+print(a + b)
+print(a << 3)
+print((hello)a & d)
