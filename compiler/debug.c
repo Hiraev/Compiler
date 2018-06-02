@@ -7,7 +7,7 @@ void print(struct Token *tokens) {
     int d = 0;
     while (tokens[d].type != TEND) {
         struct Token t = tokens[d];
-        printf("%d\t", d);
+        printf("%d\t%d\t", d, t.line);
         switch (t.type) {
             case ID:
                 printf("ID   ");
@@ -26,6 +26,9 @@ void print(struct Token *tokens) {
                 break;
             case NUM:
                 printf("NUM  ");
+                break;
+            case SCLN:
+                printf("SCLN ");
                 break;
             case STR:
                 printf("STR  ");

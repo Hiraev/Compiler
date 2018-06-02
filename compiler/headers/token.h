@@ -17,13 +17,15 @@
  * BINOP    - бинарная операция
  * NUM      - число
  * STR      - строка
+ * SCLN     - ";"
  * TEND     - метка окончания потока токенов
  */
 enum token_type {
-    ID, KWORD, LBRC, RBRC, BINOP, NUM, STR, TEND
+    ID, KWORD, LBRC, RBRC, BINOP, NUM, STR, SCLN, TEND
 };
 
 struct Token {
+    unsigned line;
     enum token_type type;
     char str[64];
 };
