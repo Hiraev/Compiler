@@ -42,7 +42,6 @@ int is_num(const char *word) {
 
 int is_delim(char c) {
     if (strchr("; \t\n()+-*/=%\"#", c) != NULL) return 1;
-    if (strchr("<>", c) != NULL) return 2;
     return 0;
 }
 
@@ -62,7 +61,7 @@ void check_id(char *id, unsigned line) {
             if (*sym == '\0') return;
         }
     }
-    printerr(BAD_VAR, id, line);
+    printerr(err(BAD_VAR), id, line);
 }
 
 void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsigned line_num) {
@@ -172,26 +171,6 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
             wp++;
             update_mem(wp, &mem_size);
 
-        } else if (_is_delim == 2) {
-            save(word, &length, &wp, &mem_size, line_num);
-            switch (sym) {
-                case '<':
-                    if (next_sym == '<') {
-                        tokens[wp] = (struct Token) {line_num, BINOP, "<<"};
-                        fseek(f, 1, SEEK_CUR);
-                    } else printerr(err(SYNTAX_ERROR), &sym, line_num);
-                    break;
-                case '>':
-                    if (next_sym == '>') {
-                        tokens[wp] = (struct Token) {line_num, BINOP, ">>"};
-                        fseek(f, 1, SEEK_CUR);
-                    } else printerr(err(SYNTAX_ERROR), &sym, line_num);
-                    break;
-                default:
-                    break;
-            }
-            wp++;
-            update_mem(wp, &mem_size);
         } else {
             word[length] = sym;
             length++;
