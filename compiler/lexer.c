@@ -23,9 +23,9 @@ int is_kword(const char *word) {
     return 0;
 }
 
-void printerr(char message[], char sym, unsigned line) {
+void printerr(char message[], char *word, unsigned line) {
     printf("%s\n", message);
-    printf("В строке %d: %c", line, sym);
+    printf("В строке %d: %s", line, word);
     exit(1);
 }
 
@@ -41,7 +41,7 @@ int is_num(const char *word) {
 }
 
 int is_delim(char c) {
-    if (strchr("; \t\n()+-*/=%|&\"#", c) != NULL) return 1;
+    if (strchr("; \t\n()+-*/=%\"#", c) != NULL) return 1;
     if (strchr("<>", c) != NULL) return 2;
     return 0;
 }
@@ -53,6 +53,18 @@ void update_mem(unsigned n_tokens, unsigned *mem_size) {
     }
 }
 
+void check_id(char *id, unsigned line) {
+    if (((*id >= 'a') && (*id <= 'z')) || ((*id >= 'A') && (*id <= 'Z'))) {
+        char *sym = id;
+        while ((*sym >= 'a' && *sym <= 'z') || (*sym >= 'A' && *sym <= 'Z') || (*sym >= '0' && *sym <= '9') ||
+               *sym == '_') {
+            sym++;
+            if (*sym == '\0') return;
+        }
+    }
+    printerr(BAD_VAR, id, line);
+}
+
 void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsigned line_num) {
     if (*length != 0) {
         word[*length] = '\0';
@@ -61,6 +73,7 @@ void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsign
         } else if (is_num(word)) {
             tokens[*wp] = (struct Token) {line_num, NUM};
         } else {
+            check_id(word, line_num);
             tokens[*wp] = (struct Token) {line_num, ID};
         }
         strcpy(tokens[*wp].str, word);
@@ -127,12 +140,6 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
                 case '%':
                     tokens[wp] = (struct Token) {line_num, BINOP, "%"};
                     break;
-                case '|':
-                    tokens[wp] = (struct Token) {line_num, BINOP, "|"};
-                    break;
-                case '&':
-                    tokens[wp] = (struct Token) {line_num, BINOP, "&"};
-                    break;
                 case '=':
                     tokens[wp] = (struct Token) {line_num, BINOP, "="};
                     break;
@@ -172,13 +179,13 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
                     if (next_sym == '<') {
                         tokens[wp] = (struct Token) {line_num, BINOP, "<<"};
                         fseek(f, 1, SEEK_CUR);
-                    } else printerr(err(SYNTAX_ERROR), sym, line_num);
+                    } else printerr(err(SYNTAX_ERROR), &sym, line_num);
                     break;
                 case '>':
                     if (next_sym == '>') {
                         tokens[wp] = (struct Token) {line_num, BINOP, ">>"};
                         fseek(f, 1, SEEK_CUR);
-                    } else printerr(err(SYNTAX_ERROR), sym, line_num);
+                    } else printerr(err(SYNTAX_ERROR), &sym, line_num);
                     break;
                 default:
                     break;
