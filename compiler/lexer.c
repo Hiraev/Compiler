@@ -23,11 +23,6 @@ int is_kword(const char *word) {
     return 0;
 }
 
-void printerr(char message[], char *word, unsigned line) {
-    printf("%s\n", message);
-    printf("В строке %d: %s", line, word);
-    exit(1);
-}
 
 int is_num(const char *word) {
     int start = 0;
@@ -61,7 +56,7 @@ void check_id(char *id, unsigned line) {
             if (*sym == '\0') return;
         }
     }
-    printerr(err(BAD_VAR), id, line);
+    printerr(err("Лексическая ошибка.\n"BAD_VAR), id, line);
 }
 
 void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsigned line_num) {
@@ -111,8 +106,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
                 word[length] = sym;
                 length++;
                 if (length == MAX_BUFF_SIZE) {
-                    printf(err(TOO_LONG_VAR)"\nВ строке %d: %s...", line_num, word);
-                    exit(1);
+                    printerr(err("Лексическая ошибка.\n"TOO_LONG_VAR), word, line_num);
                 }
             }
         } else if (_is_delim == 1) {
@@ -175,8 +169,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
             word[length] = sym;
             length++;
             if (length == MAX_BUFF_SIZE) {
-                printf(err(TOO_LONG_VAR)"\nВ строке %d: %s...", line_num, word);
-                exit(1);
+                printerr(err("Лексическая ошибка.\n"TOO_LONG_VAR), word, line_num);
             }
             if (next_sym == EOF) save(word, &length, &wp, &mem_size, line_num);
         }
