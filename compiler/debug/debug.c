@@ -1,7 +1,7 @@
 //
 // Created by Malik Hiraev on 01.06.2018.
 //
-#include "headers/debug.h"
+#include "debug.h"
 
 void print(struct Token *tokens) {
     int d = 0;

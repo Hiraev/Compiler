@@ -4,6 +4,6 @@
 
 #ifndef COMPILER_DEBUG_H
 #define COMPILER_DEBUG_H
-#include "lexer.h"
+#include "../headers/lexer.h"
 void print(struct Token * tokens);
 #endif //COMPILER_DEBUG_H

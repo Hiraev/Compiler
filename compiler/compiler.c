@@ -3,7 +3,8 @@
 //
 #include "headers/lexer.h"
 #include "headers/errors.h"
-#include "headers/debug.h"
+#include "debug/debug.h"
+#include "headers/synalyzer.h"
 int main(int num, char **c) {
     //  Слишком мало аргументов
     if (num < 2) {
