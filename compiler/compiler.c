@@ -5,6 +5,7 @@
 #include "headers/errors.h"
 #include "debug/debug.h"
 #include "headers/synalyzer.h"
+
 int main(int num, char **c) {
     //  Слишком мало аргументов
     if (num < 2) {
@@ -22,6 +23,8 @@ int main(int num, char **c) {
     }
 
     struct Token *tokens = lexer(f, 12);
-    print(tokens);
+    //print(tokens);
+    synalyze(tokens);
+
     return 0;
 }

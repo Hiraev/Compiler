@@ -6,6 +6,20 @@
 #include "headers/synalyzer.h"
 #include "headers/errors.h"
 
+#define DECL 1 //Если это объявление
+#define NODECL 0 //Если просто присваивание
+
+static _Bool is_id_num_read(struct Token t) {
+    return t.type == ID
+           || t.type == NUM
+           || (t.type == KWORD
+               && !strcmp(t.str, "read"));
+}
+
+static _Bool is_binop(struct Token t) {
+    return t.type == BINOP && strcmp(t.str, "=");
+}
+
 static void str_analyze(struct Token **tokens) {
     unsigned counter = 0;
     while ((*tokens)->type != SCLN) {
@@ -39,20 +53,93 @@ static void print_analyze(struct Token **tokens) {
     (*tokens)++;
 }
 
-//TODO
-static void assign_analyze(struct Token **tokens) {
+/*
+ * КОНЕЧНЫЙ АВТОМАТ С 3-мя СОСТОЯНИЯМИ
+ * далее под BINOP подразумевается {BINOP}/{"="}
+ * под READ подразумевается KWORD: "read"
+ * init - точка входа в автомат
+ * exit - точка выхода из автомата
+ *
+ * Переходы:
+ * init     NUM, ID, READ     ->  0
+ * init     LBRC              ->  1
+ * 0        BINOP             ->  1
+ * 1        LBRC              ->  1
+ * 1        NUM, ID, READ     ->  2
+ * 2        BINOP             ->  1
+ * 2        RBRC              ->  3
+ * 3        RBRC              ->  3
+ * 3        BINOP             ->  1
+ * 3        SCLN              ->  exit
+ * 2        SCLN              ->  exit
+ * 0        SCLN              ->  exit
+ */
+static void expr_analyze(struct Token **tokens) {
+    short state = 0;
+    unsigned lbrc = 0;
+    unsigned rbrc = 0;
+    // init
+    if ((**tokens).type == LBRC) {
+        state = 1;
+        lbrc++;
+        (*tokens)++;
+    } else if (is_id_num_read(**tokens)) {
+        (*tokens)++;
+        if ((**tokens).type == SCLN) {
+            (*tokens)++;
+            return;
+        } else if ((**tokens).type == BINOP && strcmp((**tokens).str, "=")) {
+            state = 1;
+        } else printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+        (*tokens)++;
+    } else printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+
+    //Переходы между состояниями
     while ((**tokens).type != SCLN) {
+        if ((*tokens)->type == TEND) printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+        if (lbrc == 175) {
+            int x = 10;
+        }
+        if (state == 1) {
+            if (is_id_num_read(**tokens)) {
+                state = 2;
+            } else if ((**tokens).type == LBRC) lbrc++;
+            else printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+        } else if (state == 2) {
+            if ((**tokens).type == RBRC) {
+                if (lbrc <= rbrc)
+                    printerr(err(SYNTAX_ERROR), "Ошибка выражения. Закравающая скобка без пары", (*tokens)->line);
+                state = 3;
+                rbrc++;
+            } else if (is_binop(**tokens)) {
+                state = 1;
+            } else printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+        } else if (state == 3) {
+            if ((**tokens).type == RBRC) {
+                if (lbrc <= rbrc)
+                    printerr(err(SYNTAX_ERROR), "Ошибка выражения. Закравающая скобка без пары", (*tokens)->line);
+                rbrc++;
+            } else if (is_binop(**tokens)) {
+                state = 1;
+            } else printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+        }
         (*tokens)++;
     }
+    if (state == 1) printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+    if (lbrc != rbrc)
+        printerr(err(SYNTAX_ERROR), "Ошибка выражения. Несоответсвие кол-во открывающих и закрывающих скобок",
+                 (*tokens)->line);
     (*tokens)++;
 }
 
-//TODO
-static void expr_analyze(struct Token **tokens) {
-    while ((**tokens).type != SCLN) {
-        (*tokens)++;
-    }
+static void assign_analyze(struct Token **tokens, unsigned is_decl) {
     (*tokens)++;
+    if ((*tokens)->type == TEND) printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+    if (is_decl) (*tokens)++;
+    if (((**tokens).type != BINOP || strcmp((**tokens).str, "=")) ||
+        (*(++(*tokens))).type == SCLN)
+        printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+    expr_analyze(tokens);
 }
 
 void synalyze(struct Token *tokens) {
@@ -65,7 +152,7 @@ void synalyze(struct Token *tokens) {
                 if (!strcmp(current->str, "str")) {
                     str_analyze(&current);
                 } else if (!strcmp(current->str, "int")) {
-                    assign_analyze(&current);
+                    assign_analyze(&current, DECL);
                 } else if (!strcmp(current->str, "print")) {
                     print_analyze(&current);
                 } else {
@@ -73,7 +160,7 @@ void synalyze(struct Token *tokens) {
                 }
                 continue;
             case ID:
-                assign_analyze(&current);
+                assign_analyze(&current, NODECL);
                 continue;
             default:
                 printerr(err(SYNTAX_ERROR), current->str, current->line);
