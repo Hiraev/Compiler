@@ -1,0 +1,27 @@
+touch log
+echo "++++++++++++++ТЕСТИРОВАНИЕ РАБОТЫ СИНТАКСИЧЕСКОГО АНАЛИЗАТОРА++++++++++" > log
+echo $ENDL >> log
+echo "----------Здесь все должно быть без ошибок-----------------------------" >> log
+../cmake-build-debug/Compiler ../test/input/file.txt >> log
+echo $ENDL >> log
+echo "==========Вывод завершен=======================================file.txt" >> log
+echo $ENDL >> log
+echo "----------Здесь неправильное название переменной-----------------------" >> log
+../cmake-build-debug/Compiler ../test/input/file2.txt >> log
+echo $ENDL >> log
+echo "==========Вывод завершен======================================file2.txt" >> log
+echo $ENDL >> log
+echo "----------Здесь неверный вывод-----------------------------------------" >> log
+../cmake-build-debug/Compiler ../test/input/file3.txt >> log
+echo $ENDL >> log
+echo "==========Вывод завершен======================================file3.txt" >> log
+echo $ENDL >> log
+echo "----------Здесь забыта ;-----------------------------------------------" >> log
+../cmake-build-debug/Compiler ../test/input/file4.txt >> log
+echo $ENDL >> log
+echo "==========Вывод завершен======================================file4.txt" >> log
+echo $ENDL >> log
+echo "----------Здесь ошибка в выражении-------------------------------------" >> log
+../cmake-build-debug/Compiler ../test/input/file5.txt >> log
+echo $ENDL >> log
+echo "==========Вывод завершен======================================file5.txt" >> log
