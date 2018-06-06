@@ -124,7 +124,7 @@ static void expr_analyze(struct Token **tokens) {
     }
     if (state == 1) printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
     if (lbrc != rbrc)
-        printerr(err(SYNTAX_ERROR), "Ошибка выражения. Несоответсвие кол-во открывающих и закрывающих скобок",
+        printerr(err(SYNTAX_ERROR), "Ошибка выражения. Несоответствие кол-ва открывающих и закрывающих скобок",
                  (*tokens)->line);
     (*tokens)++;
 }
