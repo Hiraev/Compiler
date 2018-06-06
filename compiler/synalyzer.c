@@ -6,14 +6,13 @@
 #include "headers/synalyzer.h"
 #include "headers/errors.h"
 
-#define DECL 1 //Если это объявление
-#define NODECL 0 //Если просто присваивание
+#define DEF 1 //Если это объявление
+#define NO_DEF 0 //Если просто присваивание
 
 static _Bool is_id_num_read(struct Token t) {
     return t.type == ID
            || t.type == NUM
-           || (t.type == KWORD
-               && !strcmp(t.str, "read"));
+           || !strcmp(t.str, "read");
 }
 
 static _Bool is_binop(struct Token t) {
@@ -149,7 +148,7 @@ void synalyze(struct Token *tokens) {
                 if (!strcmp(current->str, "str")) {
                     str_analyze(&current);
                 } else if (!strcmp(current->str, "int")) {
-                    assign_analyze(&current, DECL);
+                    assign_analyze(&current, DEF);
                 } else if (!strcmp(current->str, "print")) {
                     print_analyze(&current);
                 } else {
@@ -157,7 +156,7 @@ void synalyze(struct Token *tokens) {
                 }
                 continue;
             case ID:
-                assign_analyze(&current, NODECL);
+                assign_analyze(&current, NO_DEF);
                 continue;
             default:
                 printerr(err(SYNTAX_ERROR), current->str, current->line);
