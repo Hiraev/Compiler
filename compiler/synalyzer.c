@@ -97,9 +97,6 @@ static void expr_analyze(struct Token **tokens) {
     //Переходы между состояниями
     while ((**tokens).type != SCLN) {
         if ((*tokens)->type == TEND) printerr(err(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
-        if (lbrc == 175) {
-            int x = 10;
-        }
         if (state == 1) {
             if (is_id_num_read(**tokens)) {
                 state = 2;
