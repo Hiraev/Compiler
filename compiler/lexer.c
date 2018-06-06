@@ -174,6 +174,6 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
             if (next_sym == EOF) save(word, &length, &wp, &mem_size, line_num);
         }
     }
-    tokens[wp] = (struct Token) {line_num, TEND};
+    tokens[wp] = (struct Token) {line_num - 1, TEND};
     return tokens;
 }
