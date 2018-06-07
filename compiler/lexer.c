@@ -115,55 +115,50 @@ struct Token *lexer(FILE *f) {
             switch (sym) {
                 case '-':
                     if (!isdigit(next_sym)) {
-                        tokens[wp] = (struct Token) {line_num, BINOP, "-"};
+                        tokens[wp++] = (struct Token) {line_num, BINOP, "-"};
                     } else {
                         word[length] = sym;
                         length++;
-                        wp--;
                     }
                     break;
                 case '+':
-                    tokens[wp] = (struct Token) {line_num, BINOP, "+"};
+                    tokens[wp++] = (struct Token) {line_num, BINOP, "+"};
                     break;
                 case '*':
-                    tokens[wp] = (struct Token) {line_num, BINOP, "*"};
+                    tokens[wp++] = (struct Token) {line_num, BINOP, "*"};
                     break;
                 case '/':
-                    tokens[wp] = (struct Token) {line_num, BINOP, "/"};
+                    tokens[wp++] = (struct Token) {line_num, BINOP, "/"};
                     break;
                 case '%':
-                    tokens[wp] = (struct Token) {line_num, BINOP, "%"};
+                    tokens[wp++] = (struct Token) {line_num, BINOP, "%"};
                     break;
                 case '=':
-                    tokens[wp] = (struct Token) {line_num, BINOP, "="};
+                    tokens[wp++] = (struct Token) {line_num, BINOP, "="};
                     break;
                 case '(':
-                    tokens[wp] = (struct Token) {line_num, LBRC, "("};
+                    tokens[wp++] = (struct Token) {line_num, LBRC, "("};
                     break;
                 case ')':
-                    tokens[wp] = (struct Token) {line_num, RBRC, ")"};
+                    tokens[wp++] = (struct Token) {line_num, RBRC, ")"};
                     break;
                 case ';':
-                    tokens[wp] = (struct Token) {line_num, SCLN, ";"};
+                    tokens[wp++] = (struct Token) {line_num, SCLN, ";"};
                     break;
                 case '"':
                     is_str = true;
-                    wp--;
                     break;
                 case '#':
                     is_comm = true;
-                    wp--;
                     break;
                 case '\n':
                     line_num++;
                 case ' ':
                 case '\t':
-                    wp--;
                     break;
                 default:
                     break;
             }
-            wp++;
             update_mem(&tokens, wp, &mem_size);
 
         } else {
