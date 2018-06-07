@@ -9,13 +9,13 @@
 #define DEF 1 //Если это объявление
 #define NO_DEF 0 //Если просто присваивание
 
-static _Bool is_id_num_read(struct Token *t) {
+static bool is_id_num_read(struct Token *t) {
     return t->type == ID
            || t->type == NUM
            || !strcmp(t->str, "read");
 }
 
-static _Bool is_binop(struct Token *t) {
+static bool is_binop(struct Token *t) {
     return t->type == BINOP && strcmp(t->str, "=");
 }
 

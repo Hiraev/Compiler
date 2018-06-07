@@ -6,9 +6,6 @@
 #include "headers/lexer.h"
 #include "headers/errors.h"
 
-#define TRUE 1
-#define FALSE 0
-#define MAX_BUFF_SIZE 64
 
 struct Token *tokens;
 
@@ -81,22 +78,22 @@ void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsign
 struct Token *lexer(FILE *f, unsigned mem_size) {
     tokens = (struct Token *) malloc(sizeof(struct Token) * mem_size);
     char sym;
-    unsigned is_comm = FALSE;
-    unsigned is_str = FALSE;
+    unsigned is_comm = false;
+    unsigned is_str = false;
     unsigned line_num = 1;
     unsigned length = 0;
     unsigned wp = 0;
-    char word[MAX_BUFF_SIZE];
+    char word[MAX_STR_LENGTH];
     while ((sym = (char) fgetc(f)) != EOF) {
         char next_sym = (char) getc(f); //Заглядываем, какой символ следующий
         if (next_sym != EOF) fseek(f, -1, SEEK_CUR); //Передвигаем указатель обратно на одну позицию
         int _is_delim = is_delim(sym);
         if (is_comm) {
-            if (next_sym == '\n') is_comm = FALSE;
+            if (next_sym == '\n') is_comm = false;
             else continue;
         } else if (is_str) {
             if (sym == '"') {
-                is_str = FALSE;
+                is_str = false;
                 word[length] = '\0';
                 length = 0;
                 tokens[wp] = (struct Token) {line_num, STR};
@@ -106,7 +103,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
             } else {
                 word[length] = sym;
                 length++;
-                if (length == MAX_BUFF_SIZE) {
+                if (length == MAX_STR_LENGTH) {
                     exit_with_msg(ERR("Лексическая ошибка.\n"
                                               TOO_LONG_VAR), word, line_num);
                 }
@@ -148,11 +145,11 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
                     tokens[wp] = (struct Token) {line_num, SCLN, ";"};
                     break;
                 case '"':
-                    is_str = TRUE;
+                    is_str = true;
                     wp--;
                     break;
                 case '#':
-                    is_comm = TRUE;
+                    is_comm = true;
                     wp--;
                     break;
                 case '\n':
@@ -170,7 +167,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
         } else {
             word[length] = sym;
             length++;
-            if (length == MAX_BUFF_SIZE) {
+            if (length == MAX_STR_LENGTH) {
                 exit_with_msg(ERR("Лексическая ошибка.\n"
                                           TOO_LONG_VAR), word, line_num);
             }

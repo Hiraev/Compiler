@@ -4,10 +4,12 @@
 
 #ifndef COMPILER_TOKEN_H
 #define COMPILER_TOKEN_H
+#define MAX_STR_LENGTH 64
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 /**
  * ID       - идентификатор
@@ -27,7 +29,7 @@ enum token_type {
 struct Token {
     unsigned line;
     enum token_type type;
-    char str[64];
+    char str[MAX_STR_LENGTH];
 };
 
 #endif //COMPILER_TOKEN_H
