@@ -21,6 +21,6 @@
 #define ERRM(message, other) ANSI_COLOR_RED message". "other ANSI_COLOR_RESET
 #define ERR(message) ANSI_COLOR_RED message"."ANSI_COLOR_RESET
 
-void printerr(char errmessage[], char string[], unsigned line);
+void exit_with_msg(char *errmessage, char *string, unsigned line);
 
 #endif //COMPILER_ERRORS_H

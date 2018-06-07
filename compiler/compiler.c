@@ -9,22 +9,20 @@
 int main(int num, char **c) {
     //  Слишком мало аргументов
     if (num < 2) {
-        printf(err(NO_FILE));
-        return 1;
+        exit_with_msg(ERR(NO_FILE), "Необходимо ввести название файла", 0);
     }
 
     FILE *f = fopen(c[1], "r");
 
     //  Не нашли файл
     if (f == NULL) {
-        printf(err(CANT_OPEN)"\n");
-        printf(c[1]);
-        return 1;
+        exit_with_msg(ERR(CANT_OPEN), c[1], 0);
     }
 
     struct Token *tokens = lexer(f, 12);
-    //print(tokens);
+#ifdef DEBUG
+    print(tokens);
+#endif
     synalyze(tokens);
-
     return 0;
 }

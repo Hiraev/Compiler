@@ -22,7 +22,7 @@ static _Bool is_binop(struct Token t) {
 static void str_analyze(struct Token **tokens) {
     unsigned counter = 0;
     while ((*tokens)->type != SCLN) {
-        if ((**tokens).type == TEND) printerr(ERR(SYNTAX_ERROR), "Не найден символ \";\"", (*tokens)->line);
+        if ((**tokens).type == TEND) exit_with_msg(ERR(SYNTAX_ERROR), "Не найден символ \";\"", (*tokens)->line);
         (*tokens)++;
         counter++;
     }
@@ -30,7 +30,7 @@ static void str_analyze(struct Token **tokens) {
         || (*tokens)[-3].type != ID
         || strcmp((*tokens)[-2].str, "=")
         || (*tokens)[-1].type != STR) {
-        printerr(ERR(SYNTAX_ERROR), "Ошибка в присваивании строки", (*tokens)->line);
+        exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка в присваивании строки", (*tokens)->line);
     }
     (*tokens)++;
 }
@@ -38,7 +38,7 @@ static void str_analyze(struct Token **tokens) {
 static void print_analyze(struct Token **tokens) {
     unsigned counter = 0;
     while ((**tokens).type != SCLN) {
-        if ((**tokens).type == TEND) printerr(ERR(SYNTAX_ERROR), "Не найден символ \";\"", (*tokens)->line);
+        if ((**tokens).type == TEND) exit_with_msg(ERR(SYNTAX_ERROR), "Не найден символ \";\"", (*tokens)->line);
         (*tokens)++;
         counter++;
     }
@@ -47,7 +47,7 @@ static void print_analyze(struct Token **tokens) {
              || (*tokens)[-1].type == STR
              || (*tokens)[-1].type == NUM)
             ) {
-        printerr(ERR(SYNTAX_ERROR), "Ошибка печати", (*tokens)->line);
+        exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка печати", (*tokens)->line);
     }
     (*tokens)++;
 }
@@ -89,52 +89,52 @@ static void expr_analyze(struct Token **tokens) {
             return;
         } else if ((**tokens).type == BINOP && strcmp((**tokens).str, "=")) {
             state = 1;
-        } else printerr(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+        } else exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
         (*tokens)++;
-    } else printerr(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+    } else exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
 
     //Переходы между состояниями
     while ((**tokens).type != SCLN) {
-        if ((*tokens)->type == TEND) printerr(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+        if ((*tokens)->type == TEND) exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
         if (state == 1) {
             if (is_id_num_read(**tokens)) {
                 state = 2;
             } else if ((**tokens).type == LBRC) lbrc++;
-            else printerr(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+            else exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
         } else if (state == 2) {
             if ((**tokens).type == RBRC) {
                 if (lbrc <= rbrc)
-                    printerr(ERR(SYNTAX_ERROR), "Ошибка выражения. Закравающая скобка без пары", (*tokens)->line);
+                    exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения. Закравающая скобка без пары", (*tokens)->line);
                 state = 3;
                 rbrc++;
             } else if (is_binop(**tokens)) {
                 state = 1;
-            } else printerr(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+            } else exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
         } else if (state == 3) {
             if ((**tokens).type == RBRC) {
                 if (lbrc <= rbrc)
-                    printerr(ERR(SYNTAX_ERROR), "Ошибка выражения. Закравающая скобка без пары", (*tokens)->line);
+                    exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения. Закравающая скобка без пары", (*tokens)->line);
                 rbrc++;
             } else if (is_binop(**tokens)) {
                 state = 1;
-            } else printerr(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+            } else exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
         }
         (*tokens)++;
     }
-    if (state == 1) printerr(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+    if (state == 1) exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
     if (lbrc != rbrc)
-        printerr(ERR(SYNTAX_ERROR), "Ошибка выражения. Несоответствие кол-ва открывающих и закрывающих скобок",
-                 (*tokens)->line);
+        exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения. Несоответствие кол-ва открывающих и закрывающих скобок",
+                      (*tokens)->line);
     (*tokens)++;
 }
 
 static void assign_analyze(struct Token **tokens, unsigned is_decl) {
     (*tokens)++;
-    if ((*tokens)->type == TEND) printerr(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+    if ((*tokens)->type == TEND) exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
     if (is_decl) (*tokens)++;
     if (((**tokens).type != BINOP || strcmp((**tokens).str, "=")) ||
         (*(++(*tokens))).type == SCLN)
-        printerr(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+        exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
     expr_analyze(tokens);
 }
 
@@ -152,14 +152,14 @@ void synalyze(struct Token *tokens) {
                 } else if (!strcmp(current->str, "print")) {
                     print_analyze(&current);
                 } else {
-                    printerr(ERR(SYNTAX_ERROR), current->str, current->line);
+                    exit_with_msg(ERR(SYNTAX_ERROR), current->str, current->line);
                 }
                 continue;
             case ID:
                 assign_analyze(&current, NO_DEF);
                 continue;
             default:
-                printerr(ERR(SYNTAX_ERROR), current->str, current->line);
+                exit_with_msg(ERR(SYNTAX_ERROR), current->str, current->line);
         }
     }
 }

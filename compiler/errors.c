@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void printerr(char errmessage[], char string[], unsigned line) {
-    printf("%s", errmessage);
-    printf("\nВ строке %d: %s", line, string);
+void exit_with_msg(char *errmessage, char *string, unsigned line) {
+    printf("%s\n", errmessage);
+    printf("В строке %d: %s", line, string);
     exit(1);
 }
