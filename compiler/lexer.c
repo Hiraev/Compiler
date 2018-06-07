@@ -68,7 +68,7 @@ void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsign
         } else if (is_id(word)){
             tokens[*wp] = (struct Token) {line_num, ID};
         } else {
-            printerr(err("Лексическая ошибка.\n"BAD_VAR), word, line_num);
+            printerr(ERR("Лексическая ошибка.\n"BAD_VAR), word, line_num);
         }
         strcpy(tokens[*wp].str, word);
         *length = 0;
@@ -106,7 +106,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
                 word[length] = sym;
                 length++;
                 if (length == MAX_BUFF_SIZE) {
-                    printerr(err("Лексическая ошибка.\n"TOO_LONG_VAR), word, line_num);
+                    printerr(ERR("Лексическая ошибка.\n"TOO_LONG_VAR), word, line_num);
                 }
             }
         } else if (_is_delim == 1) {
@@ -169,7 +169,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
             word[length] = sym;
             length++;
             if (length == MAX_BUFF_SIZE) {
-                printerr(err("Лексическая ошибка.\n"TOO_LONG_VAR), word, line_num);
+                printerr(ERR("Лексическая ошибка.\n"TOO_LONG_VAR), word, line_num);
             }
             if (next_sym == EOF) save(word, &length, &wp, &mem_size, line_num);
         }
