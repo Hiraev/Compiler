@@ -11,19 +11,16 @@
 #include <string.h>
 #include <stdbool.h>
 
-/**
- * ID       - идентификатор
- * KWORD    - ключевое слово
- * LBRC     - левая скобка "("
- * RBRC     - правая скобка ")"
- * BINOP    - бинарная операция
- * NUM      - число
- * STR      - строка
- * SCLN     - ";"
- * TEND     - метка окончания потока токенов
- */
 enum token_type {
-    ID, KWORD, LBRC, RBRC, BINOP, NUM, STR, SCLN, TEND
+    ID,         // идентификатор
+    KWORD,      // ключевое слово
+    LBRC,       // левая скобка "("
+    RBRC,       // правая скобка ")"
+    BINOP,      // бинарная операция
+    NUM,        // число
+    STR,        // строка
+    SCLN,       // ";"
+    TEND        // метка окончания потока токенов
 };
 
 struct Token {
