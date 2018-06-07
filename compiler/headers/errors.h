@@ -18,8 +18,8 @@
 #define TOO_LONG_VAR "Слишком длинная строка или название переменной"
 #define TOO_MANY_ARGS "Слишком много аргументов"
 #define BAD_CALL "Неверный вызов функции"
-#define errm(message, other) ANSI_COLOR_RED message". "other ANSI_COLOR_RESET
-#define err(message) ANSI_COLOR_RED message"."ANSI_COLOR_RESET
+#define ERRM(message, other) ANSI_COLOR_RED message". "other ANSI_COLOR_RESET
+#define ERR(message) ANSI_COLOR_RED message"."ANSI_COLOR_RESET
 
 void printerr(char errmessage[], char string[], unsigned line);
 
