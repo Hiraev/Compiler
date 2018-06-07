@@ -75,7 +75,8 @@ void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsign
     }
 }
 
-struct Token *lexer(FILE *f, unsigned mem_size) {
+struct Token *lexer(FILE *f) {
+    unsigned mem_size = 32; //Начальный размер массива токенов
     tokens = (struct Token *) malloc(sizeof(struct Token) * mem_size);
     char sym;
     unsigned is_comm = false;

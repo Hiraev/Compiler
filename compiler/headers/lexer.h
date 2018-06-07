@@ -7,6 +7,6 @@
 
 #include "token.h"
 
-struct Token *lexer(FILE *f, unsigned mem_size);
+struct Token *lexer(FILE *f);
 
 #endif //COMPILER_LEXER_H

@@ -5,6 +5,7 @@
 #include "headers/errors.h"
 #include "debug/debug.h"
 #include "headers/synalyzer.h"
+#define DEBUG
 
 int main(int num, char **c) {
     //  Слишком мало аргументов
@@ -19,7 +20,7 @@ int main(int num, char **c) {
         exit_with_msg(ERR(CANT_OPEN), c[1], 0);
     }
 
-    struct Token *tokens = lexer(f, 12);
+    struct Token *tokens = lexer(f);
 #ifdef DEBUG
     print(tokens);
 #endif
