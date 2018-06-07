@@ -2,6 +2,7 @@
 // Created by Malik Hiraev on 30.05.2018.
 //
 
+#include <ctype.h>
 #include "headers/lexer.h"
 #include "headers/errors.h"
 
@@ -11,7 +12,7 @@
 
 struct Token *tokens;
 
-char kwords[][8] = {"int", "str", "print", "read"};
+char kwords[][6] = {"int", "str", "print", "read"};
 
 int is_kword(const char *word) {
     for (int i = 0; i < sizeof(kwords); ++i) {
@@ -30,7 +31,7 @@ int is_num(const char *word) {
     for (int i = start; i < sizeof(word); ++i) {
         char c = word[i];
         if (c == '\0') return 1;
-        if ((c < '0') || (c > '9')) break;
+        if (!isdigit(c)) break;
     }
     return 0;
 }
@@ -47,16 +48,14 @@ void update_mem(unsigned n_tokens, unsigned *mem_size) {
     }
 }
 
-void check_id(char *id, unsigned line) {
-    if (((*id >= 'a') && (*id <= 'z')) || ((*id >= 'A') && (*id <= 'Z'))) {
-        char *sym = id;
-        while ((*sym >= 'a' && *sym <= 'z') || (*sym >= 'A' && *sym <= 'Z') || (*sym >= '0' && *sym <= '9') ||
-               *sym == '_') {
-            sym++;
-            if (*sym == '\0') return;
+int is_id(char *id) {
+    if (isalpha(*id)) {
+        while (isalnum(*id) || *id == '_') {
+            id++;
+            if (*id == '\0') return 1;
         }
     }
-    printerr(err("Лексическая ошибка.\n"BAD_VAR), id, line);
+    return 0;
 }
 
 void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsigned line_num) {
@@ -66,9 +65,10 @@ void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsign
             tokens[*wp] = (struct Token) {line_num, KWORD};
         } else if (is_num(word)) {
             tokens[*wp] = (struct Token) {line_num, NUM};
-        } else {
-            check_id(word, line_num);
+        } else if (is_id(word)){
             tokens[*wp] = (struct Token) {line_num, ID};
+        } else {
+            printerr(err("Лексическая ошибка.\n"BAD_VAR), word, line_num);
         }
         strcpy(tokens[*wp].str, word);
         *length = 0;
@@ -113,7 +113,7 @@ struct Token *lexer(FILE *f, unsigned mem_size) {
             save(word, &length, &wp, &mem_size, line_num);
             switch (sym) {
                 case '-':
-                    if (!(next_sym <= '9' && next_sym >= '0')) {
+                    if (!isdigit(next_sym)) {
                         tokens[wp] = (struct Token) {line_num, BINOP, "-"};
                     } else {
                         word[length] = sym;
