@@ -5,7 +5,13 @@
 #include <ctype.h>
 #include "headers/lexer.h"
 #include "headers/errors.h"
-#define SAVE_WORD save(&tokens, word, &length, &wp, &mem_size, line_num);
+
+#define SAVE_WORD save(&tokens, word, length, wp, line_num); \
+                    if (length != 0) { \
+                        length = 0; \
+                        wp++; \
+                        update_mem(&tokens, wp, &mem_size); \
+                    }
 
 char kwords[][6] = {"int", "str", "print", "read"};
 
@@ -53,23 +59,20 @@ int is_id(char *id) {
     return 0;
 }
 
-void save(struct Token **tokens, char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsigned line_num) {
-    if (*length != 0) {
-        word[*length] = '\0';
+void save(struct Token **tokens, char *word, unsigned length, unsigned wp, unsigned line_num) {
+    if (length != 0) {
+        word[length] = '\0';
         if (is_kword(word)) {
-            (*tokens)[*wp] = (struct Token) {line_num, KWORD};
+            (*tokens)[wp] = (struct Token) {line_num, KWORD};
         } else if (is_num(word)) {
-            (*tokens)[*wp] = (struct Token) {line_num, NUM};
+            (*tokens)[wp] = (struct Token) {line_num, NUM};
         } else if (is_id(word)) {
-            (*tokens)[*wp] = (struct Token) {line_num, ID};
+            (*tokens)[wp] = (struct Token) {line_num, ID};
         } else {
             exit_with_msg(ERR("Лексическая ошибка.\n"
                                       BAD_VAR), word, line_num);
         }
-        strcpy((*tokens)[*wp].str, word);
-        *length = 0;
-        (*wp)++;
-        update_mem(tokens, *wp, mem_size);
+        strcpy((*tokens)[wp].str, word);
     }
 }
 
@@ -170,7 +173,7 @@ struct Token *lexer(FILE *f) {
                 exit_with_msg(ERR("Лексическая ошибка.\n"
                                           TOO_LONG_VAR), word, line_num);
             }
-            if (next_sym == EOF) SAVE_WORD;
+            if (next_sym == EOF) { SAVE_WORD}
         }
     }
     tokens[wp] = (struct Token) {line_num - 1, TEND};
