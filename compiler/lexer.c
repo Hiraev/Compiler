@@ -15,51 +15,47 @@
 
 char kwords[][6] = {"int", "str", "print", "read"};
 
-int is_kword(const char *word) {
-    for (int i = 0; i < sizeof(kwords); ++i) {
-        for (int j = 0; j < sizeof(word); ++j) {
-            if (word[j] != kwords[i][j]) break;
-            else if (word[j] == '\0') return 1;
-        }
+static bool is_kword(const char *word) {
+    for (int i = 0; i < sizeof(kwords) / sizeof(*kwords); ++i) {
+        if (!strcmp(kwords[i], word)) return true;
     }
-    return 0;
+    return false;
 }
 
-
-int is_num(const char *word) {
+static bool is_num(const char *word) {
     int start = 0;
     if (word[0] == '-') start = 1;
-    for (int i = start; i < sizeof(word); ++i) {
+    for (int i = start;; ++i) {
         char c = word[i];
-        if (c == '\0') return 1;
+        if (c == '\0') return true;
         if (!isdigit(c)) break;
     }
-    return 0;
+    return false;
 }
 
-int is_delim(char c) {
-    if (strchr("; \t\n()+-*/=%\"#", c) != NULL) return 1;
-    return 0;
+static bool is_delim(char c) {
+    if (strchr("; \t\n()+-*/=%\"#", c) != NULL) return true;
+    return false;
 }
 
-void update_mem(struct Token **tokens, unsigned n_tokens, unsigned *mem_size) {
+static bool is_id(char *id) {
+    if (isalpha(*id)) {
+        while (isalnum(*id) || *id == '_') {
+            id++;
+            if (*id == '\0') return true;
+        }
+    }
+    return false;
+}
+
+static void update_mem(struct Token **tokens, unsigned n_tokens, unsigned *mem_size) {
     if (n_tokens + 1 == *mem_size) {
         *mem_size = *mem_size * 2;
         *tokens = (struct Token *) realloc(*tokens, sizeof(struct Token) * (*mem_size));
     }
 }
 
-int is_id(char *id) {
-    if (isalpha(*id)) {
-        while (isalnum(*id) || *id == '_') {
-            id++;
-            if (*id == '\0') return 1;
-        }
-    }
-    return 0;
-}
-
-void save(struct Token **tokens, char *word, unsigned length, unsigned wp, unsigned line_num) {
+static void save(struct Token **tokens, char *word, unsigned length, unsigned wp, unsigned line_num) {
     if (length != 0) {
         word[length] = '\0';
         if (is_kword(word)) {
@@ -168,7 +164,7 @@ struct Token *lexer(FILE *f) {
                 exit_with_msg(ERR("Лексическая ошибка.\n"
                                           TOO_LONG_VAR), word, line_num);
             }
-            if (next_sym == EOF) { SAVE_WORD}
+            if (next_sym == EOF) { SAVE_WORD }
         }
     }
     tokens[wp] = (struct Token) {line_num - 1, TEND};
