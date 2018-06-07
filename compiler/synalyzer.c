@@ -9,14 +9,14 @@
 #define DEF 1 //Если это объявление
 #define NO_DEF 0 //Если просто присваивание
 
-static _Bool is_id_num_read(struct Token t) {
-    return t.type == ID
-           || t.type == NUM
-           || !strcmp(t.str, "read");
+static _Bool is_id_num_read(struct Token *t) {
+    return t->type == ID
+           || t->type == NUM
+           || !strcmp(t->str, "read");
 }
 
-static _Bool is_binop(struct Token t) {
-    return t.type == BINOP && strcmp(t.str, "=");
+static _Bool is_binop(struct Token *t) {
+    return t->type == BINOP && strcmp(t->str, "=");
 }
 
 static void str_analyze(struct Token **tokens) {
@@ -82,7 +82,7 @@ static void expr_analyze(struct Token **tokens) {
         state = 1;
         lbrc++;
         (*tokens)++;
-    } else if (is_id_num_read(**tokens)) {
+    } else if (is_id_num_read(*tokens)) {
         (*tokens)++;
         if ((**tokens).type == SCLN) {
             (*tokens)++;
@@ -97,7 +97,7 @@ static void expr_analyze(struct Token **tokens) {
     while ((**tokens).type != SCLN) {
         if ((*tokens)->type == TEND) exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
         if (state == 1) {
-            if (is_id_num_read(**tokens)) {
+            if (is_id_num_read(*tokens)) {
                 state = 2;
             } else if ((**tokens).type == LBRC) lbrc++;
             else exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
@@ -107,7 +107,7 @@ static void expr_analyze(struct Token **tokens) {
                     exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения. Закравающая скобка без пары", (*tokens)->line);
                 state = 3;
                 rbrc++;
-            } else if (is_binop(**tokens)) {
+            } else if (is_binop(*tokens)) {
                 state = 1;
             } else exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
         } else if (state == 3) {
@@ -115,7 +115,7 @@ static void expr_analyze(struct Token **tokens) {
                 if (lbrc <= rbrc)
                     exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения. Закравающая скобка без пары", (*tokens)->line);
                 rbrc++;
-            } else if (is_binop(**tokens)) {
+            } else if (is_binop(*tokens)) {
                 state = 1;
             } else exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
         }
@@ -128,10 +128,10 @@ static void expr_analyze(struct Token **tokens) {
     (*tokens)++;
 }
 
-static void assign_analyze(struct Token **tokens, unsigned is_decl) {
+static void assign_analyze(struct Token **tokens, unsigned is_def) {
     (*tokens)++;
     if ((*tokens)->type == TEND) exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
-    if (is_decl) (*tokens)++;
+    if (is_def) (*tokens)++;
     if (((**tokens).type != BINOP || strcmp((**tokens).str, "=")) ||
         (*(++(*tokens))).type == SCLN)
         exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
