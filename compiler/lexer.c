@@ -5,9 +5,7 @@
 #include <ctype.h>
 #include "headers/lexer.h"
 #include "headers/errors.h"
-
-
-struct Token *tokens;
+#define SAVE_WORD save(&tokens, word, &length, &wp, &mem_size, line_num);
 
 char kwords[][6] = {"int", "str", "print", "read"};
 
@@ -38,10 +36,10 @@ int is_delim(char c) {
     return 0;
 }
 
-void update_mem(unsigned n_tokens, unsigned *mem_size) {
+void update_mem(struct Token **tokens, unsigned n_tokens, unsigned *mem_size) {
     if (n_tokens + 1 == *mem_size) {
         *mem_size = *mem_size * 2;
-        tokens = (struct Token *) realloc(tokens, sizeof(struct Token) * (*mem_size));
+        *tokens = (struct Token *) realloc(*tokens, sizeof(struct Token) * (*mem_size));
     }
 }
 
@@ -55,29 +53,29 @@ int is_id(char *id) {
     return 0;
 }
 
-void save(char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsigned line_num) {
+void save(struct Token **tokens, char *word, unsigned *length, unsigned *wp, unsigned *mem_size, unsigned line_num) {
     if (*length != 0) {
         word[*length] = '\0';
         if (is_kword(word)) {
-            tokens[*wp] = (struct Token) {line_num, KWORD};
+            (*tokens)[*wp] = (struct Token) {line_num, KWORD};
         } else if (is_num(word)) {
-            tokens[*wp] = (struct Token) {line_num, NUM};
-        } else if (is_id(word)){
-            tokens[*wp] = (struct Token) {line_num, ID};
+            (*tokens)[*wp] = (struct Token) {line_num, NUM};
+        } else if (is_id(word)) {
+            (*tokens)[*wp] = (struct Token) {line_num, ID};
         } else {
             exit_with_msg(ERR("Лексическая ошибка.\n"
                                       BAD_VAR), word, line_num);
         }
-        strcpy(tokens[*wp].str, word);
+        strcpy((*tokens)[*wp].str, word);
         *length = 0;
         (*wp)++;
-        update_mem(*wp, mem_size);
+        update_mem(tokens, *wp, mem_size);
     }
 }
 
 struct Token *lexer(FILE *f) {
     unsigned mem_size = 32; //Начальный размер массива токенов
-    tokens = (struct Token *) malloc(sizeof(struct Token) * mem_size);
+    struct Token *tokens = (struct Token *) malloc(sizeof(struct Token) * mem_size);
     char sym;
     unsigned is_comm = false;
     unsigned is_str = false;
@@ -100,7 +98,7 @@ struct Token *lexer(FILE *f) {
                 tokens[wp] = (struct Token) {line_num, STR};
                 strcpy(tokens[wp].str, word);
                 wp++;
-                update_mem(wp, &mem_size);
+                update_mem(&tokens, wp, &mem_size);
             } else {
                 word[length] = sym;
                 length++;
@@ -110,7 +108,7 @@ struct Token *lexer(FILE *f) {
                 }
             }
         } else if (_is_delim == 1) {
-            save(word, &length, &wp, &mem_size, line_num);
+            SAVE_WORD
             switch (sym) {
                 case '-':
                     if (!isdigit(next_sym)) {
@@ -163,7 +161,7 @@ struct Token *lexer(FILE *f) {
                     break;
             }
             wp++;
-            update_mem(wp, &mem_size);
+            update_mem(&tokens, wp, &mem_size);
 
         } else {
             word[length] = sym;
@@ -172,7 +170,7 @@ struct Token *lexer(FILE *f) {
                 exit_with_msg(ERR("Лексическая ошибка.\n"
                                           TOO_LONG_VAR), word, line_num);
             }
-            if (next_sym == EOF) save(word, &length, &wp, &mem_size, line_num);
+            if (next_sym == EOF) SAVE_WORD;
         }
     }
     tokens[wp] = (struct Token) {line_num - 1, TEND};
