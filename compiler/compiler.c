@@ -5,25 +5,22 @@
 #include "headers/errors.h"
 #include "debug/debug.h"
 #include "headers/synalyzer.h"
+
 #define DEBUG
 
 int main(int num, char **c) {
     //  Слишком мало аргументов
-    if (num < 2) {
-        exit_with_msg(ERR(NO_FILE), "Необходимо ввести название файла", 0);
-    }
+    if (num < 2) exit_with_msg(ERR(NO_FILE), "Необходимо ввести название файла", 0);
 
-    FILE *f = fopen(c[1], "r");
+    FILE *file = fopen(c[1], "r");
 
     //  Не нашли файл
-    if (f == NULL) {
-        exit_with_msg(ERR(CANT_OPEN), c[1], 0);
-    }
+    if (file == NULL) exit_with_msg(ERR(CANT_OPEN), c[1], 0);
 
-    struct Token *tokens = lexer(f);
+    struct Token *tokens = lexer(file);
 #ifdef DEBUG
     print(tokens);
 #endif
-    synalyze(tokens);
+    struct Line *lines = synalyze(tokens);
     return 0;
 }

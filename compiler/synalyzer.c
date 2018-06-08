@@ -9,6 +9,13 @@
 #define DEF 1 //Если это объявление
 #define NO_DEF 0 //Если просто присваивание
 
+static void update_mem(struct Line **lines, unsigned n_lines, unsigned *mem_size) {
+    if (n_lines + 1 == *mem_size) {
+        *mem_size = *mem_size * 2;
+        *lines = (struct Line *) realloc(*lines, sizeof(struct Line) * *mem_size);
+    }
+}
+
 static bool is_id_num_read(struct Token *t) {
     return t->type == ID
            || t->type == NUM
@@ -138,28 +145,38 @@ static void assign_analyze(struct Token **tokens, unsigned is_def) {
     expr_analyze(tokens);
 }
 
-void synalyze(struct Token *tokens) {
-    //symtab = (struct Sym *) malloc(sizeof(struct Sym) * SIMTAB_SIZE);
+struct Line *synalyze(struct Token *tokens) {
+    unsigned mem_size = 10;
+    unsigned line_num = 0;
+    struct Line *lines = (struct Line *) malloc(sizeof(struct Line) * mem_size);
     struct Token *current = tokens;
     //Данный цикл проверяет корректность первых токенов
     while (current->type != TEND) {
         switch (current->type) {
             case KWORD:
                 if (!strcmp(current->str, "str")) {
+                    lines[line_num] = (struct Line) {STR_DEF, current};
                     str_analyze(&current);
                 } else if (!strcmp(current->str, "int")) {
+                    lines[line_num] = (struct Line) {INT_DEF, current};
                     assign_analyze(&current, DEF);
                 } else if (!strcmp(current->str, "print")) {
+                    lines[line_num] = (struct Line) {PRINT, current};
                     print_analyze(&current);
                 } else {
                     exit_with_msg(ERR(SYNTAX_ERROR), current->str, current->line);
                 }
-                continue;
+                break;
             case ID:
+                lines[line_num] = (struct Line) {ASSIGNMENT, current};
                 assign_analyze(&current, NO_DEF);
-                continue;
+                break;
             default:
                 exit_with_msg(ERR(SYNTAX_ERROR), current->str, current->line);
         }
+        update_mem(&lines, line_num + 1, &mem_size);
+        line_num++;
     }
+    lines[line_num] = (struct Line) {LEND};
+    return lines;
 }

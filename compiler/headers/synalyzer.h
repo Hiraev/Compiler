@@ -5,6 +5,8 @@
 #ifndef COMPILER_SYNALYZER_H
 #define COMPILER_SYNALYZER_H
 
-void synalyze(struct Token *tokens);
+#include "line.h"
+
+struct Line *synalyze(struct Token *tokens);
 
 #endif //COMPILER_SYNALYZER_H
