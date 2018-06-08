@@ -20,7 +20,8 @@ void print(struct Token *tokens) {
             PRINT(SCLN, "SCLN")
             PRINT(STR, "STR")
         }
-        printf("\t%s\n", tokens[d].str);
+        if (t.type != NUM) printf("\t%s\n", tokens[d].str);
+        else printf("\t%d\n", tokens[d].num);
         d++;
     }
 }

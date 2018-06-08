@@ -22,6 +22,14 @@ static bool is_kword(const char *word) {
     return false;
 }
 
+static bool is_in_range(char *word) {
+    long n = strtol(word, &word, 10);
+    if (n <= INT32_MAX && n >= INT32_MIN) return true;
+    return false;
+}
+
+static int32_t to_int32(char *word) { return (int32_t) strtol(word, &word, 10); }
+
 static bool is_num(const char *word) {
     int start = 0;
     if (word[0] == '-') start = 1;
@@ -60,15 +68,18 @@ static void save(struct Token **tokens, char *word, unsigned length, unsigned wp
         word[length] = '\0';
         if (is_kword(word)) {
             (*tokens)[wp] = (struct Token) {line_num, KWORD};
+            strcpy((*tokens)[wp].str, word);
         } else if (is_num(word)) {
+            if (!is_in_range(word)) exit_with_msg(ERR(BAD_NUM), word, line_num);
             (*tokens)[wp] = (struct Token) {line_num, NUM};
+            (*tokens)[wp].num = to_int32(word);
         } else if (is_id(word)) {
             (*tokens)[wp] = (struct Token) {line_num, ID};
+            strcpy((*tokens)[wp].str, word);
         } else {
             exit_with_msg(ERR("Лексическая ошибка.\n"
                                       BAD_VAR), word, line_num);
         }
-        strcpy((*tokens)[wp].str, word);
     }
 }
 

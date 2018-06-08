@@ -26,7 +26,10 @@ enum token_type {
 struct Token {
     unsigned line;
     enum token_type type;
-    char str[MAX_STR_LENGTH];
+    union {
+        char str[MAX_STR_LENGTH];
+        int32_t num;
+    };
 };
 
 #endif //COMPILER_TOKEN_H
