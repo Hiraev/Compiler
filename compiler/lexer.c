@@ -6,11 +6,11 @@
 #include "headers/lexer.h"
 #include "headers/errors.h"
 
-#define SAVE_WORD save(&tokens, word, length, wp, line_num); \
+#define SAVE_WORD save(&tokens, word, length, tp, line_num); \
                     if (length != 0) { \
                         length = 0; \
-                        wp++; \
-                        update_mem(&tokens, wp, &mem_size); \
+                        tp++; \
+                        update_mem(&tokens, tp, &mem_size); \
                     }
 
 char kwords[][6] = {"int", "str", "print", "read"};
@@ -63,19 +63,19 @@ static void update_mem(struct Token **tokens, unsigned n_tokens, unsigned *mem_s
     }
 }
 
-static void save(struct Token **tokens, char *word, unsigned length, unsigned wp, unsigned line_num) {
+static void save(struct Token **tokens, char *word, unsigned length, unsigned tp, unsigned line_num) {
     if (length != 0) {
         word[length] = '\0';
         if (is_kword(word)) {
-            (*tokens)[wp] = (struct Token) {line_num, KWORD};
-            strcpy((*tokens)[wp].str, word);
+            (*tokens)[tp] = (struct Token) {line_num, KWORD};
+            strcpy((*tokens)[tp].str, word);
         } else if (is_num(word)) {
             if (!is_in_range(word)) exit_with_msg(ERR(BAD_NUM), word, line_num);
-            (*tokens)[wp] = (struct Token) {line_num, NUM};
-            (*tokens)[wp].num = to_int32(word);
+            (*tokens)[tp] = (struct Token) {line_num, NUM};
+            (*tokens)[tp].num = to_int32(word);
         } else if (is_id(word)) {
-            (*tokens)[wp] = (struct Token) {line_num, ID};
-            strcpy((*tokens)[wp].str, word);
+            (*tokens)[tp] = (struct Token) {line_num, ID};
+            strcpy((*tokens)[tp].str, word);
         } else {
             exit_with_msg(ERR("Лексическая ошибка.\n"
                                       BAD_VAR), word, line_num);
@@ -87,11 +87,11 @@ struct Token *lexer(FILE *f) {
     unsigned mem_size = 32; //Начальный размер массива токенов
     struct Token *tokens = (struct Token *) malloc(sizeof(struct Token) * mem_size);
     char sym;
-    unsigned is_comm = false;
-    unsigned is_str = false;
+    bool is_comm = false;
+    bool is_str = false;
     unsigned line_num = 1;
     unsigned length = 0;
-    unsigned wp = 0;
+    unsigned tp = 0;
     char word[MAX_STR_LENGTH];
     while ((sym = (char) fgetc(f)) != EOF) {
         char next_sym = (char) getc(f); //Заглядываем, какой символ следующий
@@ -105,10 +105,10 @@ struct Token *lexer(FILE *f) {
                 is_str = false;
                 word[length] = '\0';
                 length = 0;
-                tokens[wp] = (struct Token) {line_num, STR};
-                strcpy(tokens[wp].str, word);
-                wp++;
-                update_mem(&tokens, wp, &mem_size);
+                tokens[tp] = (struct Token) {line_num, STR};
+                strcpy(tokens[tp].str, word);
+                tp++;
+                update_mem(&tokens, tp, &mem_size);
             } else {
                 word[length] = sym;
                 length++;
@@ -122,35 +122,35 @@ struct Token *lexer(FILE *f) {
             switch (sym) {
                 case '-':
                     if (!isdigit(next_sym)) {
-                        tokens[wp++] = (struct Token) {line_num, BINOP, "-"};
+                        tokens[tp++] = (struct Token) {line_num, BINOP, "-"};
                     } else {
                         word[length] = sym;
                         length++;
                     }
                     break;
                 case '+':
-                    tokens[wp++] = (struct Token) {line_num, BINOP, "+"};
+                    tokens[tp++] = (struct Token) {line_num, BINOP, "+"};
                     break;
                 case '*':
-                    tokens[wp++] = (struct Token) {line_num, BINOP, "*"};
+                    tokens[tp++] = (struct Token) {line_num, BINOP, "*"};
                     break;
                 case '/':
-                    tokens[wp++] = (struct Token) {line_num, BINOP, "/"};
+                    tokens[tp++] = (struct Token) {line_num, BINOP, "/"};
                     break;
                 case '%':
-                    tokens[wp++] = (struct Token) {line_num, BINOP, "%"};
+                    tokens[tp++] = (struct Token) {line_num, BINOP, "%"};
                     break;
                 case '=':
-                    tokens[wp++] = (struct Token) {line_num, BINOP, "="};
+                    tokens[tp++] = (struct Token) {line_num, BINOP, "="};
                     break;
                 case '(':
-                    tokens[wp++] = (struct Token) {line_num, LBRC, "("};
+                    tokens[tp++] = (struct Token) {line_num, LBRC, "("};
                     break;
                 case ')':
-                    tokens[wp++] = (struct Token) {line_num, RBRC, ")"};
+                    tokens[tp++] = (struct Token) {line_num, RBRC, ")"};
                     break;
                 case ';':
-                    tokens[wp++] = (struct Token) {line_num, SCLN, ";"};
+                    tokens[tp++] = (struct Token) {line_num, SCLN, ";"};
                     break;
                 case '"':
                     is_str = true;
@@ -166,7 +166,7 @@ struct Token *lexer(FILE *f) {
                 default:
                     break;
             }
-            update_mem(&tokens, wp, &mem_size);
+            update_mem(&tokens, tp, &mem_size);
 
         } else {
             word[length] = sym;
@@ -178,6 +178,6 @@ struct Token *lexer(FILE *f) {
             if (next_sym == EOF) { SAVE_WORD }
         }
     }
-    tokens[wp] = (struct Token) {line_num - 1, TEND};
+    tokens[tp] = (struct Token) {line_num - 1, TEND};
     return tokens;
 }
