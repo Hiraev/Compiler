@@ -9,7 +9,7 @@
 
 enum instruction {
     PRINT_INT,
-    PRINT_INT_IMM,
+    PRINT_IMM,
     PRINT_STR,
     WRITE_INT
 };
