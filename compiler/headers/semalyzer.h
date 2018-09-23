@@ -25,5 +25,6 @@ struct Sym {
     char *ID; //a link to the char array in the token
 };
 
-void semanalyze(struct Line *lines);
+struct ForGenerator *semanalyze(struct Line *lines);
+
 #endif //COMPILER_SEMALYZER_H
