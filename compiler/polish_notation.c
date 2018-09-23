@@ -39,6 +39,19 @@ void update_expr(unsigned *size, struct Expr **expr) {
     *expr = (struct Expr *) realloc(*expr, sizeof(struct Expr) * (*size));
 }
 
+void choose_op(struct st **opers, struct Expr **expr, unsigned *num_of_tokens) {
+    enum op operation = NULL;
+    char *str_oper = del(opers)->str;
+    if (!strcmp(str_oper, "+")) operation = ADD;
+    else if (!strcmp(str_oper, "-")) operation = SUB;
+    else if (!strcmp(str_oper, "*")) operation = MUL;
+    else if (!strcmp(str_oper, "/")) operation = DIV;
+    else if (!strcmp(str_oper, "%")) operation = MOD;
+    **expr = (struct Expr) {E_OPERATOR, operation};
+    *num_of_tokens = *num_of_tokens + 1;
+    *expr = *expr + 1;
+}
+
 struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap) {
     unsigned size = 30;
     unsigned num_of_tokens = 0;
@@ -54,16 +67,7 @@ struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap) {
 
         if (t_type == RBRC) {
             while (opers->token->type != LBRC) {
-                enum op operation = NULL;
-                char *str_oper = del(&opers)->str;
-                if (!strcmp(str_oper, "+")) operation = ADD;
-                else if (!strcmp(str_oper, "-")) operation = SUB;
-                else if (!strcmp(str_oper, "*")) operation = MUL;
-                else if (!strcmp(str_oper, "/")) operation = DIV;
-                else if (!strcmp(str_oper, "%")) operation = MOD;
-                *expr = (struct Expr) {E_OPERATOR, operation};
-                num_of_tokens++;
-                expr++;
+                choose_op(&opers, &expr, &num_of_tokens);
             }
             del(&opers);
         } else if (t_type == ID) {
@@ -83,21 +87,15 @@ struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap) {
                 opers = push(opers, token);
             } else {
                 while (opers != NULL && prior(opers->token) >= prior(token)) {
-                    enum op operation = NULL;
-                    char *str_oper = del(&opers)->str;
-                    if (!strcmp(str_oper, "+")) operation = ADD;
-                    else if (!strcmp(str_oper, "-")) operation = SUB;
-                    else if (!strcmp(str_oper, "*")) operation = MUL;
-                    else if (!strcmp(str_oper, "/")) operation = DIV;
-                    else if (!strcmp(str_oper, "%")) operation = MOD;
-                    *expr = (struct Expr) {E_OPERATOR, operation};
-                    num_of_tokens++;
-                    expr++;
+                    choose_op(&opers, &expr, &num_of_tokens);
                 }
                 opers = push(opers, token);
             }
         }
         token++;
+    }
+    while (opers != NULL) {
+        choose_op(&opers, &expr, &num_of_tokens);
     }
     *expr = (struct Expr) {E_END, NULL};
     return first_expr;
