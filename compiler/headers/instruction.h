@@ -6,6 +6,7 @@
 #define COMPILER_INSTRUCTION_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 enum instruction {
     PRINT_INT,
