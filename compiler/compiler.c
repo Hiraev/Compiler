@@ -5,6 +5,7 @@
 #include "headers/errors.h"
 #include "debug/debug.h"
 #include "headers/synalyzer.h"
+#include "headers/semalyzer.h"
 
 #define DEBUG
 
@@ -22,5 +23,12 @@ int main(int num, char **c) {
     print(tokens);
 #endif
     struct Line *lines = synalyze(tokens);
+
+    //ПОЛУЧАЕМ ВАЛИДНЫЙ КОД, ЕСЛИ ФУНКЦИЯ ОТРАБАТЫВАЕТ УСПЕШНО
+    //Такие же Line, что и в предыдущем, только выражения в обратной польской нотации
+    struct ForGenerator *forGenerator = semanalyze(lines);
+#ifdef DEBUG
+    print_2(forGenerator);
+#endif
     return 0;
 }
