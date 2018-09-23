@@ -56,28 +56,26 @@ void semanalyze(struct Line *lines) {
     unsigned num_of_strings = 0; //Кол-во строковых переменных
     unsigned num_of_ints = 0; //Кол-во числовых переменных
 
-    unsigned idmap_size = 10;
+    unsigned idmap_size = 20;
     struct ID_map *idmap = (struct ID_map *) malloc(sizeof(struct ID_map) * idmap_size); //инициализируем карту ID
 
-    unsigned inst_size = 10;
+    unsigned inst_size = 20;
     unsigned num_of_instructions = 0;
     struct Instr *instrs = (struct Instr *) malloc(sizeof(struct Instr) * inst_size);
     struct Instr *first_instr = instrs;
 
-    unsigned num_for_string_array = 10;
+    unsigned num_for_string_array = 20;
     unsigned num_of_undefined_strings = 0;
     char **strings = (char **) malloc(sizeof(char *) * num_for_string_array); //Выходные строки
 
-    unsigned symtab_size = 10; ///Размер таблицы(на самом деле просто массив) при инициализации
+    unsigned symtab_size = 20; ///Размер таблицы(на самом деле просто массив) при инициализации
     unsigned sym_index = 0; //Индекс текущего символа в таблице
     struct Sym *symtab = (struct Sym *) malloc(sizeof(struct Sym) * symtab_size); //инициализируем саму таблицу
 
-    unsigned num_of_line = 1;
+    //unsigned num_of_line = 1;
     unsigned current_symtab_size = 0; //Сколько идентификаторо сейчас в таблице символов
     struct Line *current = lines; //доставем первую строку
     while (current->type != LEND) { //делаем пока есть строки
-        struct Token *token = current->tokens; //Первый токен (int, str, print, ID)
-
         //ОБНОВЛЯЕМ РАЗМЕРЫ МАССИВОВ
         if (sym_index == symtab_size - 1) { //Если Индекс достиг зачение symtab_syze - 1, пора увеличивать таблицу
             update_mem(&symtab_size, &symtab);
@@ -92,35 +90,38 @@ void semanalyze(struct Line *lines) {
             update_strings(&strings, &num_for_string_array);
         }
 
+        struct Token *token = current->tokens; //Первый токен (int, str, print, ID)
 
         if (current->type == INT_DEF || current->type == STR_DEF) {
             //В token лежит название переменной
             char *id = (++token)->str;
             //Если переменная уже есть в таблице символов, значит нужно выкинуть ошибку
-            if (in_symtab(symtab, id, current_symtab_size) != NO_TYPE) exit_with_msg(ERR(REP_DEF), id, num_of_line);
+            if (in_symtab(symtab, id, current_symtab_size) != NO_TYPE) exit_with_msg(ERR(REP_DEF), id, token->line);
             //Если это объявление переменной числового типа
             if (current->type == INT_DEF) {
                 add_to_symtab(symtab, INTEGER, id, &sym_index);
                 token += 2; //Прыгаем к первому токену после знака равно
-                check_expr(symtab, token, current_symtab_size, num_of_line);
+                check_expr(symtab, token, current_symtab_size, token[-2].line);
                 idmap[num_of_ints + num_of_strings - num_of_undefined_strings] = (struct ID_map) {id, num_of_ints};
 
                 //TODO to_polish_notation
-                //*instrs = (struct Instr) {false, WRITE_INT, num_of_ints, to_polish_notation(token, idmap)};
+                *instrs = (struct Instr) {false, WRITE_INT, num_of_ints, to_polish_notation(token, idmap)};
                 num_of_ints++;
             } else if (current->type == STR_DEF) {
                 add_to_symtab(symtab, STRING, id, &sym_index);
                 idmap[num_of_ints + num_of_strings - num_of_undefined_strings] = (struct ID_map) {id, num_of_strings};
-                strings[num_of_strings] = id;
+                strings[num_of_strings] = (token + 2)->str;
                 num_of_strings++;
+                instrs--;
+                num_of_instructions--;
             }
             current_symtab_size++;
         } else if (current->type == ASSIGNMENT) {
             char *id = token->str;
             enum sym_type s_type = in_symtab(symtab, id, current_symtab_size);
-            if (s_type == STRING) exit_with_msg(ERR(CANT_CHANGE_STR), id, num_of_line);
-            if (s_type == NO_TYPE) exit_with_msg(ERR(HAVE_TO_DEFINE), id, num_of_line);
-            check_expr(symtab, token, current_symtab_size, num_of_line);
+            if (s_type == STRING) exit_with_msg(ERR(CANT_CHANGE_STR), id, token->line);
+            if (s_type == NO_TYPE) exit_with_msg(ERR(HAVE_TO_DEFINE), id, token->line);
+            check_expr(symtab, token, current_symtab_size, token->line);
             //TODO to_polish_notation
             unsigned index = get_index(idmap, id);
             token += 2; //Прыгаем к первому токену после знака равно
@@ -134,27 +135,38 @@ void semanalyze(struct Line *lines) {
                 num_of_undefined_strings++;
             } else if (t_type == ID) {
                 unsigned int_index = get_index(idmap, token->str);
-                *instrs = (struct Instr) {false, PRINT_INT, int_index, NULL};
+                enum sym_type s_type = in_symtab(symtab, token->str, current_symtab_size);
+                if (s_type == STRING) {
+                    *instrs = (struct Instr) {false, PRINT_STR, int_index, NULL};
+                } else {
+                    *instrs = (struct Instr) {false, PRINT_INT, int_index, NULL};
+                }
             } else if (t_type == NUM) {
                 struct Expr *expr = (struct Expr *) malloc(sizeof(struct Expr));
                 *expr = (struct Expr) {E_NUMBER, (int32_t) token->num};
-                *instrs = (struct Instr) {true, PRINT_INT_IMM, 0, expr};
+                *instrs = (struct Instr) {true, PRINT_IMM, 0, expr};
             }
+
         }
         //Переходим к следующей строке
+        num_of_instructions++;
         instrs++;
         current++;
-        num_of_line++;
     }
 
+    printf("\n\nALL STRINGS:\n");
+    for (int i = 0; i < num_of_strings; i++) {
+        printf("%s\n", strings[i]);
+    }
 
-    for (int i = 0; i < num_of_line; ++i) {
+    for (int i = 0; i < num_of_instructions; ++i) {
+        printf("%d ", i + 1);
         switch (first_instr[i].type) {
             case PRINT_INT:
                 printf("PRINT_INT: %d\n", first_instr[i].id);
                 break;
-            case PRINT_INT_IMM:
-                printf("PRINT_INT_IMM: %d\n", first_instr[i].expr->number);
+            case PRINT_IMM:
+                printf("PRINT_IMM: %d\n", first_instr[i].expr->number);
                 break;
             case PRINT_STR:
                 printf("PRINT_STR: %s\n", strings[first_instr[i].id]);
@@ -164,15 +176,31 @@ void semanalyze(struct Line *lines) {
                 struct Expr *expr = first_instr[i].expr;
                 while (expr->type != E_END) {
                     enum expr_elem_type expr_elem_type1 = expr->type;
-                    switch(expr_elem_type1) {
+                    switch (expr_elem_type1) {
                         case E_OPERATOR:
-                            printf(" op ");
+                            switch (expr->oper) {
+                                case ADD:
+                                    printf(" ADD ");
+                                    break;
+                                case SUB:
+                                    printf(" SUB ");
+                                    break;
+                                case MUL:
+                                    printf(" MUL ");
+                                    break;
+                                case DIV:
+                                    printf(" DIV ");
+                                    break;
+                                case MOD:
+                                    printf(" MOD ");
+                                    break;
+                            }
                             break;
                         case E_NUMBER:
-                            printf(" num ");
+                            printf(" %d ", expr->number);
                             break;
                         case E_ID:
-                            printf(" id ");
+                            printf(" (id: %d) ", expr->id);
                             break;
                         case E_READ:
                             printf(" read ");
@@ -180,6 +208,7 @@ void semanalyze(struct Line *lines) {
                     }
                     expr++;
                 }
+                printf("\n");
                 break;
         }
     }
