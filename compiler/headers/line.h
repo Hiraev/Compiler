@@ -17,6 +17,6 @@ enum line_type {
 
 struct Line {
     enum line_type type;
-    struct Token *lines;
+    struct Token *tokens;
 };
 #endif //COMPILER_LINE_H
