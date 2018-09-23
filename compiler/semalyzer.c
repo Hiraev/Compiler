@@ -157,5 +157,6 @@ struct ForGenerator *semanalyze(struct Line *lines) {
     struct ForGenerator *forGenerator = (struct ForGenerator *) malloc(sizeof(struct ForGenerator));
     *forGenerator = (struct ForGenerator) {strings, num_of_strings, num_of_ints, num_of_instructions, first_instr};
     free(symtab);
+    free(idmap);
     return forGenerator;
 }

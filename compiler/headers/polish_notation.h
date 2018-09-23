@@ -7,7 +7,7 @@
 
 #include "token.h"
 #include "instruction.h"
-#include "cheker.h"
+#include "checker.h"
 //Стек
 struct st {
     struct Token *token;

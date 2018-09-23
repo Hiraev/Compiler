@@ -9,7 +9,7 @@
 #include "line.h"
 #include "errors.h"
 #include "polish_notation.h"
-#include "cheker.h"
+#include "checker.h"
 
 //Для структуры Sym
 enum sym_type {
