@@ -37,7 +37,7 @@ void update_expr(struct Expr **expr, unsigned *size) {
 }
 
 void choose_op(struct st **opers, struct Expr *expr, unsigned expr_index) {
-    enum op operation = NULL;
+    enum op operation = -1;
     char *str_oper = del(opers)->str;
     if (!strcmp(str_oper, "+")) operation = ADD;
     else if (!strcmp(str_oper, "-")) operation = SUB;
