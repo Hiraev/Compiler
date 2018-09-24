@@ -3,4 +3,4 @@ project(Compiler C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(Compiler compiler/lexer.c compiler/compiler.c compiler/debug.c compiler/synalyzer.c)
+add_executable(Compiler compiler/compiler.c compiler/debug/debug.c compiler/lexer.c compiler/synalyzer.c compiler/errors.c compiler/semalyzer.c compiler/polish_notation.c compiler/checker.c compiler/code_generator.c)
