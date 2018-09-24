@@ -59,6 +59,7 @@ struct ForGenerator *semanalyze(struct Line *lines) {
     unsigned idmap_size = 20;
     struct ID_map *idmap = (struct ID_map *) malloc(sizeof(struct ID_map) * idmap_size); //инициализируем карту ID
 
+    //TODO PROBLEM WITH REALLOC
     unsigned inst_size = 20;
     unsigned num_of_instructions = 0;
     struct Instr *instrs = (struct Instr *) malloc(sizeof(struct Instr) * inst_size);
@@ -104,7 +105,6 @@ struct ForGenerator *semanalyze(struct Line *lines) {
                 check_expr(symtab, token, current_symtab_size, token[-2].line);
                 idmap[num_of_ints + num_of_strings - num_of_undefined_strings] = (struct ID_map) {id, num_of_ints};
 
-                //TODO to_polish_notation
                 *instrs = (struct Instr) {false, WRITE_INT, num_of_ints, to_polish_notation(token, idmap)};
                 num_of_ints++;
             } else if (current->type == STR_DEF) {
@@ -122,7 +122,6 @@ struct ForGenerator *semanalyze(struct Line *lines) {
             if (s_type == STRING) exit_with_msg(ERR(CANT_CHANGE_STR), id, token->line);
             if (s_type == NO_TYPE) exit_with_msg(ERR(HAVE_TO_DEFINE), id, token->line);
             check_expr(symtab, token, current_symtab_size, token->line);
-            //TODO to_polish_notation
             unsigned index = get_index(idmap, id);
             token += 2; //Прыгаем к первому токену после знака равно
             *instrs = (struct Instr) {false, WRITE_INT, index, to_polish_notation(token, idmap)};
