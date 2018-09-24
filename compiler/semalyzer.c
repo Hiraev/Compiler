@@ -155,6 +155,25 @@ struct ForGenerator *semanalyze(struct Line *lines) {
         current++;
     }
 
+    //Считаем максильмальную глубину выражения (то есть сколько переменных надо хранить одновременно)
+    unsigned max_depth = 0;
+    for (int i = 0; i < instr_index; ++i) {
+        if (instrs[i].type == WRITE_INT) {
+            struct Expr *expr = instrs[i].expr;
+            unsigned tmp = 0;
+            while (expr->type != E_END) {
+                if (expr->type != E_OPERATOR) {
+                    tmp++;
+                } else {
+                    if (tmp > max_depth) max_depth = tmp;
+                    tmp = 0;
+                }
+                expr++;
+            }
+        }
+    }
+
+
     struct ForGenerator *forGenerator = (struct ForGenerator *) malloc(sizeof(struct ForGenerator));
     *forGenerator = (struct ForGenerator) {strings, num_of_strings, num_of_ints, instr_index, instrs};
     free(symtab);
