@@ -5,17 +5,17 @@
 #include "headers/semalyzer.h"
 #include "headers/instruction.h"
 
-void update_mem(unsigned *size, struct Sym **symtab) {
+void update_mem(struct Sym **symtab, unsigned *size) {
     *size = *size * 2;
     *symtab = (struct Sym *) realloc(*symtab, sizeof(struct Sym) * *size);
 }
 
-void update_ID_map(struct ID_map **idmap, unsigned *size) {
+void update_id_map(struct ID_map **idmap, unsigned *size) {
     *size = *size * 2;
     *idmap = (struct ID_map *) realloc(*idmap, sizeof(struct ID_map) * *size);
 }
 
-void update_Instr(struct Instr **instrs, unsigned *size) {
+void update_instrs(struct Instr **instrs, unsigned *size) {
     *size = *size * 2;
     *instrs = (struct Instr *) realloc(*instrs, sizeof(struct Instr) * *size);
 }
@@ -24,7 +24,6 @@ void update_strings(char ***strings, unsigned *size) {
     *size = *size * 2;
     *strings = (char **) realloc(*strings, sizeof(char *) * *size);
 }
-
 
 enum sym_type in_symtab(struct Sym *symtab, char *word, unsigned current_symtab_size) {
     for (unsigned i = 0; i < current_symtab_size; i++) {
@@ -59,11 +58,9 @@ struct ForGenerator *semanalyze(struct Line *lines) {
     unsigned idmap_size = 20;
     struct ID_map *idmap = (struct ID_map *) malloc(sizeof(struct ID_map) * idmap_size); //инициализируем карту ID
 
-    //TODO PROBLEM WITH REALLOC
     unsigned inst_size = 20;
-    unsigned num_of_instructions = 0;
+    unsigned instr_index = 0;
     struct Instr *instrs = (struct Instr *) malloc(sizeof(struct Instr) * inst_size);
-    struct Instr *first_instr = instrs;
 
     unsigned num_for_string_array = 20;
     unsigned num_of_undefined_strings = 0;
@@ -79,13 +76,13 @@ struct ForGenerator *semanalyze(struct Line *lines) {
     while (current->type != LEND) { //делаем пока есть строки
         //ОБНОВЛЯЕМ РАЗМЕРЫ МАССИВОВ
         if (sym_index == symtab_size - 1) { //Если Индекс достиг зачение symtab_syze - 1, пора увеличивать таблицу
-            update_mem(&symtab_size, &symtab);
+            update_mem(&symtab, &symtab_size);
         }
         if (num_of_ints + num_of_strings == idmap_size - 1) {
-            update_ID_map(&idmap, &idmap_size);
+            update_id_map(&idmap, &idmap_size);
         }
-        if (num_of_instructions == inst_size - 1) {
-            update_Instr(&instrs, &inst_size);
+        if (instr_index == inst_size - 1) {
+            update_instrs(&instrs, &inst_size);
         }
         if (num_of_strings == num_for_string_array - 1) {
             update_strings(&strings, &num_for_string_array);
@@ -105,15 +102,14 @@ struct ForGenerator *semanalyze(struct Line *lines) {
                 check_expr(symtab, token, current_symtab_size, token[-2].line);
                 idmap[num_of_ints + num_of_strings - num_of_undefined_strings] = (struct ID_map) {id, num_of_ints};
 
-                *instrs = (struct Instr) {false, WRITE_INT, num_of_ints, to_polish_notation(token, idmap)};
+                instrs[instr_index] = (struct Instr) {false, WRITE_INT, num_of_ints, to_polish_notation(token, idmap)};
                 num_of_ints++;
             } else if (current->type == STR_DEF) {
                 add_to_symtab(symtab, STRING, id, &sym_index);
                 idmap[num_of_ints + num_of_strings - num_of_undefined_strings] = (struct ID_map) {id, num_of_strings};
                 strings[num_of_strings] = (token + 2)->str;
                 num_of_strings++;
-                instrs--;
-                num_of_instructions--;
+                instr_index--;
             }
             current_symtab_size++;
         } else if (current->type == ASSIGNMENT) {
@@ -124,37 +120,35 @@ struct ForGenerator *semanalyze(struct Line *lines) {
             check_expr(symtab, token, current_symtab_size, token->line);
             unsigned index = get_index(idmap, id);
             token += 2; //Прыгаем к первому токену после знака равно
-            *instrs = (struct Instr) {false, WRITE_INT, index, to_polish_notation(token, idmap)};
+            instrs[instr_index] = (struct Instr) {false, WRITE_INT, index, to_polish_notation(token, idmap)};
         } else if (current->type == PRINT) {
             enum token_type t_type = (++token)->type;
             if (t_type == STR) {
                 strings[num_of_strings] = (token)->str;
-                *instrs = (struct Instr) {true, PRINT_STR, num_of_strings, NULL};
+                instrs[instr_index] = (struct Instr) {true, PRINT_STR, num_of_strings, NULL};
                 num_of_strings++;
                 num_of_undefined_strings++;
             } else if (t_type == ID) {
                 unsigned int_index = get_index(idmap, token->str);
                 enum sym_type s_type = in_symtab(symtab, token->str, current_symtab_size);
                 if (s_type == STRING) {
-                    *instrs = (struct Instr) {false, PRINT_STR, int_index, NULL};
+                    instrs[instr_index] = (struct Instr) {false, PRINT_STR, int_index, NULL};
                 } else {
-                    *instrs = (struct Instr) {false, PRINT_INT, int_index, NULL};
+                    instrs[instr_index] = (struct Instr) {false, PRINT_INT, int_index, NULL};
                 }
             } else if (t_type == NUM) {
                 struct Expr *expr = (struct Expr *) malloc(sizeof(struct Expr));
                 *expr = (struct Expr) {E_NUMBER, (int32_t) token->num};
-                *instrs = (struct Instr) {true, PRINT_IMM, 0, expr};
+                instrs[instr_index] = (struct Instr) {true, PRINT_IMM, 0, expr};
             }
-
         }
         //Переходим к следующей строке
-        num_of_instructions++;
-        instrs++;
+        instr_index++;
         current++;
     }
 
     struct ForGenerator *forGenerator = (struct ForGenerator *) malloc(sizeof(struct ForGenerator));
-    *forGenerator = (struct ForGenerator) {strings, num_of_strings, num_of_ints, num_of_instructions, first_instr};
+    *forGenerator = (struct ForGenerator) {strings, num_of_strings, num_of_ints, instr_index, instrs};
     free(symtab);
     free(idmap);
     return forGenerator;
