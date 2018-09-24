@@ -105,6 +105,8 @@ struct ForGenerator *semanalyze(struct Line *lines) {
             if (current->type == INT_DEF) {
                 add_to_symtab(symtab, INTEGER, id, &sym_index);
                 token += 2; //Прыгаем к первому токену после знака равно
+                //Сначала проверяем выражение справа, это позволяет проконтролировать случай, когда в
+                // выражении используется переменная, которая объявлена как результат этого выражения
                 check_expr(symtab, token, current_symtab_size, token[-2].line);
                 idmap[num_of_ints + num_of_strings - num_of_undefined_strings] = (struct ID_map) {id, num_of_ints};
 
