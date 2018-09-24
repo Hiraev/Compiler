@@ -50,6 +50,7 @@ struct Expr {
 
 struct ForGenerator {
     char **strings; //Все строковые константы
+    unsigned max_depth; //Максимальная глубина выражения
     unsigned num_of_strings; //Кол-во строковых переменных
     unsigned num_of_ints; //Кол-во числовых переменных
     unsigned num_of_instructions;

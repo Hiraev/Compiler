@@ -116,6 +116,7 @@ void printf_scanf_patterng(FILE *file, bool is_print_int, bool is_read) {
 
 void generate(FILE *file, struct ForGenerator *forGenerator) {
     char **strings = forGenerator->strings;
+    unsigned max_depth = forGenerator->max_depth;
     unsigned num_of_strings = forGenerator->num_of_strings;
     unsigned num_of_ints = forGenerator->num_of_ints;
     unsigned num_of_instrs = forGenerator->num_of_instructions;
