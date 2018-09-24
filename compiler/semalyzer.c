@@ -41,8 +41,14 @@ void add_to_symtab(struct Sym *symtab, enum sym_type type, char *word, unsigned 
 void check_expr(struct Sym *symtab, struct Token *token, unsigned current_symtab_size, unsigned num_of_line) {
     while (token->type != SCLN) {
         enum token_type type = token->type;
-        if (type == ID && in_symtab(symtab, token->str, current_symtab_size) != INTEGER) {
-            exit_with_msg(ERRM(BAD_TYPE, "Строка в выражении с целыми числами"), token->str, num_of_line);
+        enum sym_type s_type = in_symtab(symtab, token->str, current_symtab_size);
+        if (type == ID) {
+            if (s_type == NO_TYPE) {
+                exit_with_msg(ERRM(BAD_TYPE, "Необходимо объявить переменную перед ее использованием"), token->str,
+                              num_of_line);
+            } else if (s_type == STRING) {
+                exit_with_msg(ERRM(BAD_TYPE, "Строка в выражении с целыми числами"), token->str, num_of_line);
+            }
         }
         token++;
     }
