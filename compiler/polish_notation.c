@@ -6,10 +6,7 @@
 
 
 unsigned prior(struct Token *token) {
-    //Приоритет операции
-    //'(' - 1,
-    // '+' и '-' 2,
-    // '*' '/' '%' - 3
+    //Приоритет операции '(' - 1, '+' и '-' 2, '*' '/' '%' - 3
     if (token->type == LBRC) return 1;
     if (!strcmp(token->str, "+") || !strcmp(token->str, "-")) return 2;
     return 3;
@@ -39,7 +36,7 @@ void update_expr(unsigned *size, struct Expr **expr) {
     *expr = (struct Expr *) realloc(*expr, sizeof(struct Expr) * (*size));
 }
 
-void choose_op(struct st **opers, struct Expr **expr, unsigned *num_of_tokens) {
+void choose_op(struct st **opers, struct Expr *expr, unsigned expr_index) {
     enum op operation = NULL;
     char *str_oper = del(opers)->str;
     if (!strcmp(str_oper, "+")) operation = ADD;
@@ -47,38 +44,35 @@ void choose_op(struct st **opers, struct Expr **expr, unsigned *num_of_tokens) {
     else if (!strcmp(str_oper, "*")) operation = MUL;
     else if (!strcmp(str_oper, "/")) operation = DIV;
     else if (!strcmp(str_oper, "%")) operation = MOD;
-    **expr = (struct Expr) {E_OPERATOR, operation};
-    *num_of_tokens = *num_of_tokens + 1;
-    *expr = *expr + 1;
+    else exit(1); //ЭТОГО НИКОГДА НЕ ДОЛЖНО СЛУЧИТЬСЯ, НИКОГДА!!!!!!!!!!!!!!
+    expr[expr_index] = (struct Expr) {E_OPERATOR, operation};
 }
 
 struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap) {
-    unsigned size = 30;
-    unsigned num_of_tokens = 0;
+    unsigned size = 10;
 
     //Стек операций
     struct st *opers = NULL;
+    unsigned expr_index = 0;
     struct Expr *expr = (struct Expr *) malloc(sizeof(struct Expr) * size);
-    struct Expr *first_expr = expr;
-    while (token->type != SCLN) {
-        if (num_of_tokens == size - 1) update_expr(&size, &expr);
 
+    while (token->type != SCLN) {
+        if (expr_index == size - 1) update_expr(&size, &expr);
         enum token_type t_type = token->type;
 
         if (t_type == RBRC) {
             while (opers->token->type != LBRC) {
-                choose_op(&opers, &expr, &num_of_tokens);
+                choose_op(&opers, expr, expr_index);
+                expr_index++;
             }
             del(&opers);
         } else if (t_type == ID) {
             unsigned id = get_index(idmap, token->str);
-            *expr = (struct Expr) {E_ID, id};
-            num_of_tokens++;
-            expr++;
+            expr[expr_index] = (struct Expr) {E_ID, id};
+            expr_index++;
         } else if (t_type == NUM) {
-            *expr = (struct Expr) {E_NUMBER, token->num};
-            num_of_tokens++;
-            expr++;
+            expr[expr_index] = (struct Expr) {E_NUMBER, token->num};
+            expr_index++;
         } else if (t_type == LBRC) {
             opers = push(opers, token);
         } else if (t_type == BINOP) {
@@ -87,7 +81,8 @@ struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap) {
                 opers = push(opers, token);
             } else {
                 while (opers != NULL && prior(opers->token) >= prior(token)) {
-                    choose_op(&opers, &expr, &num_of_tokens);
+                    choose_op(&opers, expr, expr_index);
+                    expr_index++;
                 }
                 opers = push(opers, token);
             }
@@ -95,8 +90,9 @@ struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap) {
         token++;
     }
     while (opers != NULL) {
-        choose_op(&opers, &expr, &num_of_tokens);
+        choose_op(&opers, expr, expr_index);
+        expr_index++;
     }
-    *expr = (struct Expr) {E_END, NULL};
-    return first_expr;
+    expr[expr_index] = (struct Expr) {E_END, NULL};
+    return expr;
 }
