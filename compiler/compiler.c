@@ -6,6 +6,7 @@
 #include "debug/debug.h"
 #include "headers/synalyzer.h"
 #include "headers/semalyzer.h"
+#include "headers/code_generator.h"
 
 #define DEBUG
 
@@ -30,5 +31,7 @@ int main(int num, char **c) {
 #ifdef DEBUG
     print_2(forGenerator);
 #endif
+    FILE *out = fopen("a.s", "w");
+    generate(out, forGenerator);
     return 0;
 }
