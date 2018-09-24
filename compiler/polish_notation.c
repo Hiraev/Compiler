@@ -31,7 +31,7 @@ struct Token *del(struct st **head) {
     return t;
 }
 
-void update_expr(unsigned *size, struct Expr **expr) {
+void update_expr(struct Expr **expr, unsigned *size) {
     *size = *size * 2;
     *expr = (struct Expr *) realloc(*expr, sizeof(struct Expr) * (*size));
 }
@@ -57,7 +57,7 @@ struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap) {
     struct Expr *expr = (struct Expr *) malloc(sizeof(struct Expr) * size);
 
     while (token->type != SCLN) {
-        if (expr_index == size - 1) update_expr(&size, &expr);
+        if (expr_index == size - 1) update_expr(&expr, &size);
         enum token_type t_type = token->type;
 
         if (t_type == RBRC) {
@@ -69,6 +69,10 @@ struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap) {
         } else if (t_type == ID) {
             unsigned id = get_index(idmap, token->str);
             expr[expr_index] = (struct Expr) {E_ID, id};
+            expr_index++;
+        } else if (t_type == KWORD) { //ТАК УВЕРЕННО ПИШЕМ E_READ, ПОТОМУ что предыдущие стадии гарантируют, что тут не
+            //будет ничего другого
+            expr[expr_index] = (struct Expr) {E_READ, -1};
             expr_index++;
         } else if (t_type == NUM) {
             expr[expr_index] = (struct Expr) {E_NUMBER, token->num};
