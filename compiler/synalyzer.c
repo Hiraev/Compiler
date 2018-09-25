@@ -141,7 +141,7 @@ static void assign_analyze(struct Token **tokens, unsigned is_def) {
     if (is_def) (*tokens)++;
     if (((**tokens).type != BINOP || strcmp((**tokens).str, "=")) ||
         (*(++(*tokens))).type == SCLN)
-        exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка выражения", (*tokens)->line);
+        exit_with_msg(ERR(SYNTAX_ERROR), "Необходимо инициализировать переменную", (*tokens)->line);
     expr_analyze(tokens);
 }
 
