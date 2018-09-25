@@ -44,7 +44,6 @@ int main(int num, char **c) {
         out[i - 1] = '\0';
         FILE *out_file = fopen(out, "w");
         generate(out_file, forGenerator);
-        printf("Файл: %s успешно скомпилирован\n", c[j]);
     }
     return 0;
 }
