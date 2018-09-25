@@ -22,6 +22,7 @@
 #define TOO_LONG_VAR "Слишком длинная строка или название переменной"
 #define TOO_MANY_ARGS "Слишком много аргументов"
 #define BAD_CALL "Неверный вызов функции"
+#define WRONG_EXPANSION "Неправильное расширение файла или его отсутсвие"
 #define ERRM(message, other) ANSI_COLOR_RED message". "other ANSI_COLOR_RESET
 #define ERR(message) ANSI_COLOR_RED message"."ANSI_COLOR_RESET
 

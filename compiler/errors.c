@@ -7,6 +7,7 @@
 
 void exit_with_msg(char *errmessage, char *string, unsigned line) {
     printf("%s\n", errmessage);
-    printf("В строке %d: %s", line, string);
+    if (line != 0) printf("В строке %d: ", line);
+    printf("%s", string);
     exit(1);
 }
