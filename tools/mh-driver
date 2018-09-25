@@ -1,0 +1,23 @@
+#!/bin/bash
+if [ -n "$1" ]
+	then
+	save_tmps=false 
+	if [ $1 = "--save-temps" ]; then
+		save_tmps=true
+		shift
+	fi
+	for param in "$@"; do
+			if ! ./mh-compiler $param ; then
+				echo "Не удалось скомпилировать файл $param"
+			else
+				echo "Файл $param успешно скомпилирован"
+				./riscv/bin/r-gcc `echo $param | rev | sed '1s/hm./s./' | rev` -o `echo $param | rev | sed '1s/hm./tuo./' | rev`
+				if ! $save_tmps ; then
+					rm `echo $param | rev | sed '1s/hm./s./' | rev`
+				fi
+			fi
+	done
+else
+	echo "No parameters found. "
+fi
+
