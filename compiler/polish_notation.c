@@ -97,6 +97,6 @@ struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap, unsig
         choose_op(&opers, expr, expr_index);
         expr_index++;
     }
-    expr[expr_index] = (struct Expr) {E_END, NULL};
+    expr[expr_index] = (struct Expr) {E_END, -1};
     return expr;
 }
