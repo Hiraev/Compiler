@@ -244,6 +244,8 @@ void generate(FILE *file, struct ForGenerator *forGenerator) {
                     char *reg = get_reg(reg_index);
                     reg_index++;
                     read(file, READ_STATIC_ADDR);
+                    //Здесь необходимо передать -1, чтобы
+                    //получить 0 в load_word
                     load_word(file, reg, READ_STATIC_ADDR - 1);
                 } else if (expr->type == E_OPERATOR) {
                     char *src1 = get_reg(reg_index - 2);
