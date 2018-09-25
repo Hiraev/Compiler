@@ -41,16 +41,16 @@ void print_2(struct ForGenerator *forGenerator) {
         printf("%d ", i + 1);
         switch (first_instr[i].type) {
             case PRINT_INT:
-                printf("PRINT_INT: %d\n", first_instr[i].id);
+                printf("PRINT_INT: ID : %d\n", first_instr[i].id);
                 break;
             case PRINT_IMM:
-                printf("PRINT_IMM: %d\n", first_instr[i].expr->number);
+                printf("PRINT_IMM: VAL: %d\n", first_instr[i].expr->number);
                 break;
             case PRINT_STR:
-                printf("PRINT_STR: %s\n", strings[first_instr[i].id]);
+                printf("PRINT_STR: ID : %s\n", strings[first_instr[i].id]);
                 break;
             case WRITE_INT:
-                printf("WRITE_INT: %d ", first_instr[i].id);
+                printf("WRITE_INT: ID : %d | ", first_instr[i].id);
                 struct Expr *expr = first_instr[i].expr;
                 while (expr->type != E_END) {
                     enum expr_elem_type expr_elem_type1 = expr->type;
@@ -81,7 +81,7 @@ void print_2(struct ForGenerator *forGenerator) {
                             printf(" (id: %d) ", expr->id);
                             break;
                         case E_READ:
-                            printf(" read ");
+                            printf(" (READ) ");
                             break;
                     }
                     expr++;
