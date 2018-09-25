@@ -7,6 +7,7 @@
 
 #include "token.h"
 #include "instruction.h"
+#include "errors.h"
 
 struct ID_map {
     char *id;
@@ -14,6 +15,6 @@ struct ID_map {
 };
 
 
-unsigned get_index(struct ID_map *id_map, char *id);
+unsigned get_index(struct ID_map *id_map, char *id, unsigned id_map_size);
 
 #endif //COMPILER_CHEKER_H

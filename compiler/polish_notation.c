@@ -48,7 +48,7 @@ void choose_op(struct st **opers, struct Expr *expr, unsigned expr_index) {
     expr[expr_index] = (struct Expr) {E_OPERATOR, operation};
 }
 
-struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap) {
+struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap, unsigned idmap_size) {
     unsigned size = 10;
 
     //Стек операций
@@ -67,7 +67,7 @@ struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap) {
             }
             del(&opers);
         } else if (t_type == ID) {
-            unsigned id = get_index(idmap, token->str);
+            unsigned id = get_index(idmap, token->str, idmap_size);
             expr[expr_index] = (struct Expr) {E_ID, id};
             expr_index++;
         } else if (t_type == KWORD) { //ТАК УВЕРЕННО ПИШЕМ E_READ, ПОТОМУ что предыдущие стадии гарантируют, что тут не

@@ -14,6 +14,6 @@ struct st {
     struct st *next;
 };
 
-struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap);
+struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmapm, unsigned idmap_size);
 
 #endif //COMPILER_POLISH_NOTATION_H

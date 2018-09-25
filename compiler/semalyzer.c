@@ -3,7 +3,6 @@
 //
 
 #include "headers/semalyzer.h"
-#include "headers/instruction.h"
 
 void update_mem(struct Sym **symtab, unsigned *size) {
     *size = *size * 2;
@@ -110,7 +109,8 @@ struct ForGenerator *semanalyze(struct Line *lines) {
                 check_expr(symtab, token, current_symtab_size, token[-2].line);
                 idmap[num_of_ints + num_of_strings - num_of_undefined_strings] = (struct ID_map) {id, num_of_ints};
 
-                instrs[instr_index] = (struct Instr) {false, WRITE_INT, num_of_ints, to_polish_notation(token, idmap)};
+                instrs[instr_index] = (struct Instr) {false, WRITE_INT, num_of_ints,
+                                                      to_polish_notation(token, idmap, idmap_size)};
                 num_of_ints++;
             } else if (current->type == STR_DEF) {
                 add_to_symtab(symtab, STRING, id, &sym_index);
@@ -126,9 +126,10 @@ struct ForGenerator *semanalyze(struct Line *lines) {
             if (s_type == STRING) exit_with_msg(ERR(CANT_CHANGE_STR), id, token->line);
             if (s_type == NO_TYPE) exit_with_msg(ERR(HAVE_TO_DEFINE), id, token->line);
             check_expr(symtab, token, current_symtab_size, token->line);
-            unsigned index = get_index(idmap, id);
+            unsigned index = get_index(idmap, id, idmap_size);
             token += 2; //Прыгаем к первому токену после знака равно
-            instrs[instr_index] = (struct Instr) {false, WRITE_INT, index, to_polish_notation(token, idmap)};
+            instrs[instr_index] = (struct Instr) {false, WRITE_INT, index,
+                                                  to_polish_notation(token, idmap, idmap_size)};
         } else if (current->type == PRINT) {
             enum token_type t_type = (++token)->type;
             if (t_type == STR) {
@@ -137,7 +138,7 @@ struct ForGenerator *semanalyze(struct Line *lines) {
                 num_of_strings++;
                 num_of_undefined_strings++;
             } else if (t_type == ID) {
-                unsigned int_index = get_index(idmap, token->str);
+                unsigned int_index = get_index(idmap, token->str, idmap_size);
                 enum sym_type s_type = in_symtab(symtab, token->str, current_symtab_size);
                 if (s_type == STRING) {
                     instrs[instr_index] = (struct Instr) {false, PRINT_STR, int_index, NULL};
