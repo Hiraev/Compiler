@@ -28,8 +28,9 @@ static bool is_binop(struct Token *t) {
 
 static void str_analyze(struct Token **tokens) {
     unsigned counter = 0;
+    struct Token *first_token = *tokens;
     while ((*tokens)->type != SCLN) {
-        if ((**tokens).type == TEND) exit_with_msg(ERR(SYNTAX_ERROR), "Не найден символ \";\"", (*tokens)->line);
+        if ((**tokens).type == TEND) exit_with_msg(ERR(SYNTAX_ERROR), "Не найден символ \";\"", first_token->line);
         (*tokens)++;
         counter++;
     }
@@ -37,7 +38,7 @@ static void str_analyze(struct Token **tokens) {
         || (*tokens)[-3].type != ID
         || strcmp((*tokens)[-2].str, "=")
         || (*tokens)[-1].type != STR) {
-        exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка в присваивании строки", (*tokens)->line);
+        exit_with_msg(ERR(SYNTAX_ERROR), "Ошибка в присваивании строки", first_token->line);
     }
     (*tokens)++;
 }
