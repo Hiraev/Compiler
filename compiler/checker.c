@@ -4,7 +4,7 @@
 #include "headers/checker.h"
 
 unsigned get_index(struct ID_map *id_map, char *id, unsigned id_map_size) {
-    for (int i = 0; i < id_map_size; ++i) {
+    for (unsigned i = 0; i < id_map_size; ++i) {
         if (id_map->id == NULL) break;
         if (!strcmp(id_map->id, id))
             return id_map->index;

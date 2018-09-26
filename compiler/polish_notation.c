@@ -45,7 +45,7 @@ void choose_op(struct st **opers, struct Expr *expr, unsigned expr_index) {
     else if (!strcmp(str_oper, "/")) operation = DIV;
     else if (!strcmp(str_oper, "%")) operation = MOD;
     else exit(1); //ЭТОГО НИКОГДА НЕ ДОЛЖНО СЛУЧИТЬСЯ, НИКОГДА!!!!!!!!!!!!!!
-    expr[expr_index] = (struct Expr) {E_OPERATOR, operation};
+    expr[expr_index] = (struct Expr) {E_OPERATOR, {operation}};
 }
 
 struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap, unsigned idmap_size) {
@@ -68,14 +68,14 @@ struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap, unsig
             del(&opers);
         } else if (t_type == ID) {
             unsigned id = get_index(idmap, token->str, idmap_size);
-            expr[expr_index] = (struct Expr) {E_ID, id};
+            expr[expr_index] = (struct Expr) {E_ID, {id}};
             expr_index++;
         } else if (t_type == KWORD) { //ТАК УВЕРЕННО ПИШЕМ E_READ, ПОТОМУ что предыдущие стадии гарантируют, что тут не
             //будет ничего другого
-            expr[expr_index] = (struct Expr) {E_READ, -1};
+            expr[expr_index] = (struct Expr) {E_READ, {-1}};
             expr_index++;
         } else if (t_type == NUM) {
-            expr[expr_index] = (struct Expr) {E_NUMBER, token->num};
+            expr[expr_index] = (struct Expr) {E_NUMBER, {token->num}};
             expr_index++;
         } else if (t_type == LBRC) {
             opers = push(opers, token);
@@ -97,6 +97,6 @@ struct Expr *to_polish_notation(struct Token *token, struct ID_map *idmap, unsig
         choose_op(&opers, expr, expr_index);
         expr_index++;
     }
-    expr[expr_index] = (struct Expr) {E_END, -1};
+    expr[expr_index] = (struct Expr) {E_END, {-1}};
     return expr;
 }

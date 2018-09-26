@@ -16,7 +16,7 @@
 char kwords[][6] = {"int", "str", "print", "read"};
 
 static bool is_kword(const char *word) {
-    for (int i = 0; i < sizeof(kwords) / sizeof(*kwords); ++i) {
+    for (unsigned i = 0; i < sizeof(kwords) / sizeof(*kwords); ++i) {
         if (!strcmp(kwords[i], word)) return true;
     }
     return false;
@@ -67,14 +67,14 @@ static void save(struct Token **tokens, char *word, unsigned length, unsigned tp
     if (length != 0) {
         word[length] = '\0';
         if (is_kword(word)) {
-            (*tokens)[tp] = (struct Token) {line_num, KWORD};
+            (*tokens)[tp] = (struct Token) {line_num, KWORD, {""}};
             strcpy((*tokens)[tp].str, word);
         } else if (is_num(word)) {
             if (!is_in_range(word)) exit_with_msg(ERR(BAD_NUM), word, line_num);
-            (*tokens)[tp] = (struct Token) {line_num, NUM};
+            (*tokens)[tp] = (struct Token) {line_num, NUM, {""}};
             (*tokens)[tp].num = to_int32(word);
         } else if (is_id(word)) {
-            (*tokens)[tp] = (struct Token) {line_num, ID};
+            (*tokens)[tp] = (struct Token) {line_num, ID, {""}};
             strcpy((*tokens)[tp].str, word);
         } else {
             exit_with_msg(ERR("Лексическая ошибка.\n"
@@ -105,7 +105,7 @@ struct Token *lexer(FILE *f) {
                 is_str = false;
                 word[length] = '\0';
                 length = 0;
-                tokens[tp] = (struct Token) {line_num, STR};
+                tokens[tp] = (struct Token) {line_num, STR, {""}};
                 strcpy(tokens[tp].str, word);
                 tp++;
                 update_mem(&tokens, tp, &mem_size);
@@ -122,35 +122,35 @@ struct Token *lexer(FILE *f) {
             switch (sym) {
                 case '-':
                     if (!isdigit(next_sym)) {
-                        tokens[tp++] = (struct Token) {line_num, BINOP, "-"};
+                        tokens[tp++] = (struct Token) {line_num, BINOP, {"-"}};
                     } else {
                         word[length] = sym;
                         length++;
                     }
                     break;
                 case '+':
-                    tokens[tp++] = (struct Token) {line_num, BINOP, "+"};
+                    tokens[tp++] = (struct Token) {line_num, BINOP, {"+"}};
                     break;
                 case '*':
-                    tokens[tp++] = (struct Token) {line_num, BINOP, "*"};
+                    tokens[tp++] = (struct Token) {line_num, BINOP, {"*"}};
                     break;
                 case '/':
-                    tokens[tp++] = (struct Token) {line_num, BINOP, "/"};
+                    tokens[tp++] = (struct Token) {line_num, BINOP, {"/"}};
                     break;
                 case '%':
-                    tokens[tp++] = (struct Token) {line_num, BINOP, "%"};
+                    tokens[tp++] = (struct Token) {line_num, BINOP, {"%"}};
                     break;
                 case '=':
-                    tokens[tp++] = (struct Token) {line_num, BINOP, "="};
+                    tokens[tp++] = (struct Token) {line_num, BINOP, {"="}};
                     break;
                 case '(':
-                    tokens[tp++] = (struct Token) {line_num, LBRC, "("};
+                    tokens[tp++] = (struct Token) {line_num, LBRC, {"("}};
                     break;
                 case ')':
-                    tokens[tp++] = (struct Token) {line_num, RBRC, ")"};
+                    tokens[tp++] = (struct Token) {line_num, RBRC, {")"}};
                     break;
                 case ';':
-                    tokens[tp++] = (struct Token) {line_num, SCLN, ";"};
+                    tokens[tp++] = (struct Token) {line_num, SCLN, {";"}};
                     break;
                 case '"':
                     is_str = true;
@@ -178,6 +178,6 @@ struct Token *lexer(FILE *f) {
             if (next_sym == EOF) { SAVE_WORD }
         }
     }
-    tokens[tp] = (struct Token) {line_num - 1, TEND};
+    tokens[tp] = (struct Token) {line_num - 1, TEND, {""}};
     return tokens;
 }

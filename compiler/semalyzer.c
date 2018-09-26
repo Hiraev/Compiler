@@ -147,7 +147,7 @@ struct ForGenerator *semanalyze(struct Line *lines) {
                 }
             } else if (t_type == NUM) {
                 struct Expr *expr = (struct Expr *) malloc(sizeof(struct Expr));
-                *expr = (struct Expr) {E_NUMBER, (int32_t) token->num};
+                *expr = (struct Expr) {E_NUMBER, {(int32_t) token->num}};
                 instrs[instr_index] = (struct Instr) {true, PRINT_IMM, 0, expr};
             }
         }
@@ -158,7 +158,7 @@ struct ForGenerator *semanalyze(struct Line *lines) {
 
     //Считаем максильмальную глубину выражения (то есть сколько переменных надо хранить одновременно)
     unsigned max_depth = 0;
-    for (int i = 0; i < instr_index; ++i) {
+    for (unsigned i = 0; i < instr_index; ++i) {
         if (instrs[i].type == WRITE_INT) {
             struct Expr *expr = instrs[i].expr;
             unsigned tmp = 0;

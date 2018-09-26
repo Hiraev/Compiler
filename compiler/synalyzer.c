@@ -178,6 +178,6 @@ struct Line *synalyze(struct Token *tokens) {
         update_mem(&lines, line_num + 1, &mem_size);
         line_num++;
     }
-    lines[line_num] = (struct Line) {LEND};
+    lines[line_num] = (struct Line) {LEND, NULL};
     return lines;
 }

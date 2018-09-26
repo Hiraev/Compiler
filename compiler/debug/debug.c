@@ -19,6 +19,8 @@ void print(struct Token *tokens) {
             PRINT(NUM, "NUM")
             PRINT(SCLN, "SCLN")
             PRINT(STR, "STR")
+            case TEND:
+                break;
         }
         if (t.type != NUM) printf("\t%s\n", tokens[d].str);
         else printf("\t%d\n", tokens[d].num);
@@ -28,16 +30,16 @@ void print(struct Token *tokens) {
 
 void print_2(struct ForGenerator *forGenerator) {
 
-    struct Instr* first_instr = forGenerator->instructions;
+    struct Instr *first_instr = forGenerator->instructions;
     unsigned num_of_strings = forGenerator->num_of_strings;
     char **strings = forGenerator->strings;
 
     printf("\n\nALL STRINGS:\n");
-    for (int i = 0; i < num_of_strings; i++) {
+    for (unsigned i = 0; i < num_of_strings; i++) {
         printf("%s\n", strings[i]);
     }
 
-    for (int i = 0; i < forGenerator->num_of_instructions; ++i) {
+    for (unsigned i = 0; i < forGenerator->num_of_instructions; ++i) {
         printf("%d ", i + 1);
         switch (first_instr[i].type) {
             case PRINT_INT:
@@ -82,6 +84,8 @@ void print_2(struct ForGenerator *forGenerator) {
                             break;
                         case E_READ:
                             printf(" (READ) ");
+                            break;
+                        case E_END:
                             break;
                     }
                     expr++;

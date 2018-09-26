@@ -85,11 +85,10 @@ void print_str(FILE *file, unsigned addr) {
 }
 
 void write_strings(FILE *file, char **strings, unsigned num_of_strings) {
-    for (int i = 0; i < num_of_strings; ++i) {
+    for (unsigned i = 0; i < num_of_strings; ++i) {
         //Здесь плюс 1 - это учет символа конца строки (как в коде от risc-v-gcc)
         size_t length = strlen(strings[i]) + 1;
         size_t align = str_align - (length % str_align);
-        if (align == -1) align = 7;
         fprintf(file, ".LC%d:\n", i);
         fprintf(file, "\t.string\t\t\"%s\"\n", strings[i]);
         if (align != 8 && align != 0) fprintf(file, "\t.zero\t\t%i\n", (unsigned) align);
@@ -164,7 +163,7 @@ void sl_registers(FILE *file, unsigned num_of_variables, unsigned how_many_sregs
     unsigned offset = sp_offset - 8;
     fprintf(file, "\t%s  \t\tra, %d(sp)\n", command, offset);
     offset -= 8;
-    for (int i = 0; i < how_many_sregs; ++i) {
+    for (unsigned i = 0; i < how_many_sregs; ++i) {
         fprintf(file, "\t%s  \t\t%s, %d(sp)\n", command, s_regs[i], offset);
         offset -= 8;
     }
@@ -219,7 +218,7 @@ void generate(FILE *file, struct ForGenerator *forGenerator) {
 
 
     //TODO ANALYZE
-    for (int i = 0; i < num_of_instrs; ++i) {
+    for (unsigned i = 0; i < num_of_instrs; ++i) {
         struct Instr *current = &instrs[i];
         if (current->type == PRINT_INT) {
             print_int(file, current->id);
