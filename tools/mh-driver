@@ -11,7 +11,7 @@ if [ -n "$1" ]
 				echo "Не удалось скомпилировать файл $param"
 			else
 				echo "Файл $param успешно скомпилирован"
-				./riscv/bin/r-gcc `echo $param | rev | sed '1s/hm./s./' | rev` -o `echo $param | rev | sed '1s/hm./tuo./' | rev`
+				./riscv/bin/riscv64-unknown-elf-gcc `echo $param | rev | sed '1s/hm./s./' | rev` -o `echo $param | rev | sed '1s/hm./tuo./' | rev`
 				if ! $save_tmps ; then
 					rm `echo $param | rev | sed '1s/hm./s./' | rev`
 				fi
