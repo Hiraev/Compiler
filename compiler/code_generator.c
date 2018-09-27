@@ -31,7 +31,7 @@ char *get_reg(unsigned reg_index) {
     if (reg_index < num_of_aregs) {
         reg = a_regs[reg_index];
     } else {
-        reg = s_regs[reg_index];
+        reg = s_regs[reg_index - num_of_aregs];
     }
     return reg;
 }
